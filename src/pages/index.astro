@@ -31,11 +31,18 @@ const hasYoutubeVideo = !youtube.url.includes("VIDEO_ID");
     <div class="section-inner split">
       <div>
         <p class="section-kicker">About</p>
-        <h2 class="section-title">声で、場の記憶をつくる。</h2>
+        <h2 class="section-title">藝大卒声楽家夫婦 あさゆみ</h2>
       </div>
-      <p class="prose">
-        あさゆみは、東京藝術大学で学んだ声楽家夫婦によるクラシック vocal duo です。コンサート、式典、学校公演、レッスン、ワークショップ、メディア出演まで、目的に合わせた音楽体験を丁寧に設計します。
-      </p>
+      <div class="prose">
+        <p>
+          あさゆみは、東京藝術大学で学んだ声楽を軸に活動する
+          ソプラノとバリトンの夫婦デュオです。
+        </p>
+        <p>
+          コンサート、学校公演、式典、パーティー、YouTubeなど、
+          場に合わせたプログラムで全国どこへでも歌いに参ります。
+        </p>
+      </div>
     </div>
   </section>
 
@@ -79,16 +86,27 @@ const hasYoutubeVideo = !youtube.url.includes("VIDEO_ID");
 
   <section class="section band">
     <div class="section-inner">
-      <p class="section-kicker">Works</p>
-      <h2 class="section-title">ご依頼いただけること</h2>
-      <div class="grid three" style="margin-top: 34px;">
+      <p class="section-kicker">WORKS</p>
+      <p class="section-kicker muted-kicker">活動内容</p>
+      <h2 class="section-title">さまざまな場へ、歌を届けています</h2>
+      <div class="works-gallery" aria-label="あさゆみの活動写真">
         {works.slice(0, 3).map((work) => (
-          <a class="card" href={url(work.href)}>
-            <span class="card-label">{work.category}</span>
-            <h3>{work.title}</h3>
-            <p>{work.description}</p>
-          </a>
+          <figure class="works-photo">
+            <img src={asset(work.image)} alt={work.imageAlt} loading="lazy" onerror="this.style.display='none'" />
+            <figcaption>{work.title}</figcaption>
+          </figure>
         ))}
+      </div>
+      <div class="works-summary">
+        <ul>
+          {works.map((work) => <li>{work.title}</li>)}
+        </ul>
+        <p>
+          コンサートや学校公演、式典演奏、レッスンまで、会場や目的に合わせた歌の時間を丁寧に構成します。
+        </p>
+      </div>
+      <div class="button-row centered">
+        <a class="button secondary" href={url("/works/")}>Worksを見る</a>
       </div>
     </div>
   </section>

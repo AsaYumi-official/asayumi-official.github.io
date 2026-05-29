@@ -1,20 +1,34 @@
 [
   {
-    "title": "コンサート出演",
+    "title": "コンサート／リサイタル出演",
     "category": "Performance",
-    "description": "クラシック声楽を中心に、ホール公演、サロンコンサート、地域イベントへ出演します。",
+    "description": "ホール公演、サロンコンサート、リサイタルなど、声楽を軸にした演奏をお届けします。",
+    "image": "/images/works_01.jpg",
+    "imageAlt": "コンサート出演の活動写真",
     "href": "/contact/"
   },
   {
-    "title": "学校・公共施設での音楽鑑賞会",
+    "title": "学校・幼稚園・公共施設での公演",
     "category": "Education",
-    "description": "声楽とピアノを身近に楽しめるプログラムを、対象年齢や会場に合わせて構成します。",
+    "description": "子どもから大人まで楽しめる音楽鑑賞会を、対象年齢や会場に合わせて構成します。",
+    "image": "/images/works_02.jpg",
+    "imageAlt": "学校や公共施設での公演の活動写真",
+    "href": "/contact/"
+  },
+  {
+    "title": "企業イベント・式典演奏",
+    "category": "Ceremony",
+    "description": "式典、パーティー、記念行事など、場の雰囲気に合わせた演奏プログラムを提案します。",
+    "image": "/images/works_03.jpg",
+    "imageAlt": "企業イベントや式典演奏の活動写真",
     "href": "/contact/"
   },
   {
     "title": "レッスン／ワークショップ",
     "category": "Lesson",
     "description": "発声、歌曲、合唱、表現づくりなど、個人・団体の目的に合わせて対応します。",
+    "image": "/images/works_03.jpg",
+    "imageAlt": "レッスンやワークショップの活動写真",
     "href": "/contact/"
   }
 ]
