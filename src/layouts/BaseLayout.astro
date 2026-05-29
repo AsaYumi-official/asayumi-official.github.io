@@ -1,0 +1,43 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/global.css";
+
+const {
+  title = "あさゆみ | Asayumi Official Site",
+  description = "東京藝術大学卒の声楽家夫婦デュオ「あさゆみ」の公式サイト。演奏依頼、レッスン、取材のお問い合わせはこちらから。",
+  ogImage = "/images/hero-asayumi-placeholder.png",
+} = Astro.props;
+
+const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImageUrl = ogImage.startsWith("http")
+  ? ogImage
+  : new URL(`${basePath}${ogImage.replace(/^\//, "")}`, Astro.site);
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:site_name" content="あさゆみ | Asayumi Official Site" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#f8f3ea" />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

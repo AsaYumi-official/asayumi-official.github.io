@@ -1,0 +1,106 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import hero from "../data/homeHero.json";
+import news from "../data/news.json";
+import youtube from "../data/youtube.json";
+import works from "../data/works.json";
+
+const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
+const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${href.replace(/^\//, "")}`;
+const hasYoutubeVideo = !youtube.url.includes("VIDEO_ID");
+---
+
+<BaseLayout>
+  <section class="hero">
+    <div class="hero-media">
+      <img src={asset(hero.image)} alt={hero.imageAlt} />
+    </div>
+    <div class="hero-content">
+      <p class="section-kicker">{hero.label}</p>
+      <h1 class="hero-title">{hero.title}</h1>
+      <p class="hero-lead">{hero.lead}</p>
+      <div class="button-row">
+        <a class="button primary" href={url(hero.primaryCta.href)}>{hero.primaryCta.label}</a>
+        <a class="button secondary" href={url(hero.secondaryCta.href)}>{hero.secondaryCta.label}</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-inner split">
+      <div>
+        <p class="section-kicker">About</p>
+        <h2 class="section-title">声で、場の記憶をつくる。</h2>
+      </div>
+      <p class="prose">
+        あさゆみは、東京藝術大学で学んだ声楽家夫婦によるクラシック vocal duo です。コンサート、式典、学校公演、レッスン、ワークショップ、メディア出演まで、目的に合わせた音楽体験を丁寧に設計します。
+      </p>
+    </div>
+  </section>
+
+  <section class="section band">
+    <div class="section-inner">
+      <p class="section-kicker">News</p>
+      <h2 class="section-title">お知らせ</h2>
+      <div class="grid" style="margin-top: 34px;">
+        {news.map((item) => (
+          <a class="card" href={url(item.href)}>
+            <time datetime={item.date}>{item.date}</time>
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-kicker">YouTube</p>
+      <h2 class="section-title">{youtube.title}</h2>
+      <p class="section-lead">{youtube.caption}</p>
+      {hasYoutubeVideo ? (
+        <iframe
+          class="youtube-frame"
+          style="margin-top: 34px;"
+          src={youtube.url}
+          title="あさゆみ YouTube 最新動画"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+        ></iframe>
+      ) : (
+        <div class="youtube-frame placeholder" style="margin-top: 34px;">
+          <span>YouTube URL 準備中</span>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="section band">
+    <div class="section-inner">
+      <p class="section-kicker">Works</p>
+      <h2 class="section-title">ご依頼いただけること</h2>
+      <div class="grid three" style="margin-top: 34px;">
+        {works.slice(0, 3).map((work) => (
+          <a class="card" href={url(work.href)}>
+            <span class="card-label">{work.category}</span>
+            <h3>{work.title}</h3>
+            <p>{work.description}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-kicker">Contact</p>
+      <h2 class="section-title">演奏・レッスン・取材のご相談</h2>
+      <p class="section-lead">ご希望の内容、時期、会場、対象者、予算感などを添えてお問い合わせください。</p>
+      <div class="button-row">
+        <a class="button primary" href={url("/contact/")}>問い合わせる</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

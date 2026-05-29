@@ -1,0 +1,20 @@
+[
+  {
+    "title": "コンサート出演",
+    "category": "Performance",
+    "description": "クラシック声楽を中心に、ホール公演、サロンコンサート、地域イベントへ出演します。",
+    "href": "/contact/"
+  },
+  {
+    "title": "学校・公共施設での音楽鑑賞会",
+    "category": "Education",
+    "description": "声楽とピアノを身近に楽しめるプログラムを、対象年齢や会場に合わせて構成します。",
+    "href": "/contact/"
+  },
+  {
+    "title": "レッスン／ワークショップ",
+    "category": "Lesson",
+    "description": "発声、歌曲、合唱、表現づくりなど、個人・団体の目的に合わせて対応します。",
+    "href": "/contact/"
+  }
+]

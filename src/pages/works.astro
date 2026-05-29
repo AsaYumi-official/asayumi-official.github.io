@@ -1,0 +1,25 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import works from "../data/works.json";
+
+const url = (href: string) => `${import.meta.env.BASE_URL.replace(/\/?$/, "/")}${href.replace(/^\//, "")}`;
+---
+
+<BaseLayout title="Works | あさゆみ" description="あさゆみに依頼できる演奏、学校公演、レッスン、ワークショップの内容。">
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-kicker">Works</p>
+      <h1 class="section-title">ご依頼いただけること</h1>
+      <p class="section-lead">目的、会場、対象者に合わせて、クラシック声楽の魅力が伝わるプログラムを設計します。</p>
+      <div class="grid three" style="margin-top: 34px;">
+        {works.map((work) => (
+          <a class="card" href={url(work.href)}>
+            <span class="card-label">{work.category}</span>
+            <h2>{work.title}</h2>
+            <p>{work.description}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

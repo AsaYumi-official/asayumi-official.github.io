@@ -1,0 +1,58 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import faq from "../data/faq.json";
+
+const inquiryTypes = [
+  {
+    title: "演奏依頼",
+    body: "コンサート、式典、学校公演、地域イベントなどの出演相談。",
+  },
+  {
+    title: "レッスン／ワークショップ",
+    body: "個人レッスン、合唱指導、発声講座、音楽鑑賞プログラム。",
+  },
+  {
+    title: "メディア／取材／広報関連",
+    body: "取材、掲載、出演依頼、プロフィール素材に関するご相談。",
+  },
+  {
+    title: "その他",
+    body: "上記に当てはまらない内容もこちらからお送りください。",
+  },
+];
+---
+
+<BaseLayout title="Contact | あさゆみ" description="あさゆみへの演奏依頼、レッスン、取材、その他お問い合わせ。">
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-kicker">Contact</p>
+      <h1 class="section-title">お問い合わせ</h1>
+      <p class="section-lead">
+        依頼内容、希望時期、会場、対象者、予算感、返信先を添えてご連絡ください。正式なフォームやメールアドレスは公開前に差し替えます。
+      </p>
+      <div class="contact-list">
+        {inquiryTypes.map((type) => (
+          <a href="mailto:contact@example.com">
+            <strong>{type.title}</strong>
+            <span>{type.body}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section band">
+    <div class="section-inner">
+      <p class="section-kicker">FAQ</p>
+      <h2 class="section-title">よくある質問</h2>
+      <div class="grid" style="margin-top: 34px;">
+        {faq.map((item) => (
+          <article class="card">
+            <h3>{item.question}</h3>
+            <p>{item.answer}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
