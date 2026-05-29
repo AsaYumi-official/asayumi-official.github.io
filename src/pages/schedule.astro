@@ -1,0 +1,23 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import schedule from "../data/schedule.json";
+---
+
+<BaseLayout title="Schedule | あさゆみ" description="あさゆみの公演、出演、レッスン、ワークショップ予定。">
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-kicker">Schedule</p>
+      <h1 class="section-title">出演・開催予定</h1>
+      <div class="grid" style="margin-top: 34px;">
+        {schedule.map((item) => (
+          <article class="schedule-item">
+            <span>{item.date} / {item.status}</span>
+            <strong>{item.title}</strong>
+            <span>{item.place}</span>
+            <span>{item.description}</span>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

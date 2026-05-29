@@ -1,0 +1,5 @@
+{
+  "title": "Latest YouTube",
+  "url": "https://www.youtube.com/embed/VIDEO_ID",
+  "caption": "最新動画のURLはこのJSONを更新すると差し替えられます。"
+}
