@@ -1,0 +1,39 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
+const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${href.replace(/^\//, "")}`;
+const posts = (await getCollection("news", ({ data }) => data.published))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+const slugFromId = (id: string) => id.replace(/\.md$/, "");
+---
+
+<BaseLayout title="お知らせ | あさゆみ" description="あさゆみの公演情報、演奏依頼、レッスン、YouTubeなどのお知らせ。">
+  <section class="section">
+    <div class="section-inner">
+      <p class="section-kicker">News</p>
+      <h1 class="section-title">お知らせ</h1>
+      <p class="section-lead">公演情報、演奏依頼、レッスン、YouTubeなどの最新情報を掲載します。</p>
+      <div class="news-list">
+        {posts.map((post) => (
+          <a class="news-card" href={url(`/news/${slugFromId(post.id)}/`)}>
+            <div>
+              <time datetime={formatDate(post.data.date)}>{formatDate(post.data.date)}</time>
+              <h2>{post.data.title}</h2>
+              <p>{post.data.summary}</p>
+            </div>
+            {post.data.image && (
+              <img src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} loading="lazy" onerror="this.style.display='none'" />
+            )}
+          </a>
+        ))}
+      </div>
+      <div class="button-row">
+        <a class="button secondary" href={url("/")}>Homeへ戻る</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

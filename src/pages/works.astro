@@ -1,25 +1,59 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import works from "../data/works.json";
+import worksData from "../data/works.json";
 
-const url = (href: string) => `${import.meta.env.BASE_URL.replace(/\/?$/, "/")}${href.replace(/^\//, "")}`;
+const asset = (href: string) => href.startsWith("http") ? href : `${import.meta.env.BASE_URL.replace(/\/?$/, "/")}${href.replace(/^\//, "")}`;
+const categories = ["すべて", "コンサート", "学校・公共施設", "イベント・式典", "メディア出演", "レコーディング", "レッスン・ワークショップ"];
+const achievements = [...worksData.achievements].sort((a, b) => b.date.localeCompare(a.date));
 ---
 
-<BaseLayout title="Works | あさゆみ" description="あさゆみに依頼できる演奏、学校公演、レッスン、ワークショップの内容。">
+<BaseLayout title="Works | あさゆみ" description="あさゆみの終了済み出演予定、演奏実績、活動実績の一覧。">
   <section class="section">
     <div class="section-inner">
       <p class="section-kicker">Works</p>
-      <h1 class="section-title">ご依頼いただけること</h1>
-      <p class="section-lead">目的、会場、対象者に合わせて、クラシック声楽の魅力が伝わるプログラムを設計します。</p>
-      <div class="grid three" style="margin-top: 34px;">
-        {works.map((work) => (
-          <a class="card" href={url(work.href)}>
-            <span class="card-label">{work.category}</span>
-            <h2>{work.title}</h2>
-            <p>{work.description}</p>
-          </a>
+      <h1 class="section-title">活動実績</h1>
+      <p class="section-lead">コンサート、学校公演、式典演奏、メディア出演、レコーディング、レッスンまで、これまでの活動をまとめています。</p>
+
+      <div class="filter-bar" aria-label="実績カテゴリ">
+        {categories.map((category, index) => (
+          <button class="filter-button" type="button" data-filter={category} aria-pressed={index === 0 ? "true" : "false"}>{category}</button>
+        ))}
+      </div>
+
+      <div class="works-results">
+        {achievements.map((work) => (
+          <article class="work-result-card" data-category={work.category}>
+            {work.image && (
+              <img src={asset(work.image)} alt={`${work.title}の写真`} loading="lazy" onerror="this.style.display='none'" />
+            )}
+            <div>
+              <div class="work-meta">
+                <time datetime={work.date}>{work.date}</time>
+                <span>{work.category}</span>
+              </div>
+              <h2>{work.title}</h2>
+              <p class="work-location">{work.location}</p>
+              <p>{work.description}</p>
+            </div>
+          </article>
         ))}
       </div>
     </div>
   </section>
+
+  <script>
+    const buttons = document.querySelectorAll<HTMLButtonElement>(".filter-button");
+    const cards = document.querySelectorAll<HTMLElement>(".work-result-card");
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const filter = button.dataset.filter || "すべて";
+        buttons.forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+        cards.forEach((card) => {
+          const matches = filter === "すべて" || card.dataset.category === filter;
+          card.hidden = !matches;
+        });
+      });
+    });
+  </script>
 </BaseLayout>

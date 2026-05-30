@@ -9,7 +9,7 @@
 - Astro
 - 静的サイト
 - GitHub Pages
-- コンテンツは `src/data/*.json` に分離
+- コンテンツは `src/data/*.json` と `src/content/news/*.md` に分離
 
 ## ページ構成
 
@@ -27,7 +27,7 @@ npm install
 npm run dev
 ```
 
-ブラウザで `http://localhost:4321/asayumi-official-site/` を開きます。
+ブラウザで `http://localhost:4321/` を開きます。
 
 ## ビルド
 
@@ -48,20 +48,20 @@ npm run preview
 公開URLの想定:
 
 ```text
-https://asayumi-official.github.io/asayumi-official-site/
+https://asayumi-official.github.io/
 ```
 
 ## 更新方法
 
-Pages CMS などを後から導入しやすいように、更新頻度の高い情報は JSON に分けています。
+Pages CMS などを後から導入しやすいように、更新頻度の高い情報は JSON と Markdown に分けています。
 
 | 内容 | ファイル |
 | --- | --- |
 | Home Hero | `src/data/homeHero.json` |
-| News | `src/data/news.json` |
+| News | `src/content/news/*.md` |
 | Schedule | `src/data/schedule.json` |
 | Works | `src/data/works.json` |
-| Shop 商品 | `src/data/shop.json` |
+| Profile | `src/data/profile.json` |
 | YouTube 最新動画URL | `src/data/youtube.json` |
 | FAQ | `src/data/faq.json` |
 | SNSリンク | `src/data/sns.json` |
@@ -71,8 +71,9 @@ Pages CMS などを後から導入しやすいように、更新頻度の高い�
 - `src/data/youtube.json` の `url`
 - `src/pages/contact.astro` の `mailto:contact@example.com`
 - `src/data/homeHero.json` の `image`
-- プロフィール本文、出演歴、商品情報、公演情報
+- `public/images/` 配下のロゴ、プロフィール、Works、News、OGP画像
+- プロフィール本文、出演歴、公演情報
 
 ## デザイン方針
 
-白と淡いベージュを基調に、余白を広く取り、スマートフォンで読みやすい構成にしています。写真を大きく扱えるよう、Home の Hero は横幅いっぱいのビジュアル領域を持たせています。
+白と淡いベージュを基調に、余白を広く取り、スマートフォンで読みやすい構成にしています。Home の Hero は縦長写真を扱いやすい2カラム構成です。
