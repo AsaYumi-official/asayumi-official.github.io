@@ -1,21 +1,55 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import profile from "../data/profile.json";
+
+const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
+const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${href.replace(/^\//, "")}`;
 ---
 
-<BaseLayout title="Profile | あさゆみ" description="東京藝術大学卒の声楽家夫婦デュオ「あさゆみ」のプロフィール。">
+<BaseLayout title="Profile | あさゆみ" description="片倉旭、朝光ゆみによる声楽家夫婦デュオ「あさゆみ」のプロフィール。">
   <section class="section">
-    <div class="section-inner split">
-      <div>
-        <p class="section-kicker">Profile</p>
-        <h1 class="section-title">東京藝術大学卒の声楽家夫婦デュオ</h1>
+    <div class="section-inner">
+      <p class="section-kicker">Profile</p>
+      <h1 class="section-title">プロフィール</h1>
+      <p class="section-lead">{profile.intro}</p>
+    </div>
+  </section>
+
+  <section class="section band profile-section">
+    <div class="section-inner">
+      <div class="profile-list">
+        {profile.members.map((member) => (
+          <article class="profile-member">
+            <figure>
+              <img src={asset(member.image)} alt={member.imageAlt} loading="lazy" onerror="this.style.display='none'" />
+            </figure>
+            <div>
+              <p class="section-kicker">{member.voice}</p>
+              <h2>{member.name}</h2>
+              <div class="prose">
+                {member.body.map((paragraph) => <p>{paragraph}</p>)}
+              </div>
+            </div>
+          </article>
+        ))}
       </div>
-      <div class="prose">
-        <p>
-          あさゆみは、クラシック声楽を軸に活動する夫婦デュオです。専門的な学びと演奏経験をもとに、ホール公演、学校公演、式典、レッスン、ワークショップなど、場に合わせた音楽を届けます。
-        </p>
-        <p>
-          詳細な経歴、受賞歴、出演歴、写真素材は今後このページに追加します。
-        </p>
+      <div class="profile-gallery">
+        {profile.gallery.map((item) => (
+          <figure>
+            <img src={asset(item.image)} alt={item.imageAlt} loading="lazy" onerror="this.style.display='none'" />
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-inner narrow centered-copy">
+      <p>「あさゆみ」としての活動実績は Worksページをご覧ください。各種お問い合わせはこちらからお送りください。</p>
+      <div class="button-row centered">
+        <a class="button secondary" href={url("/works/")}>Worksページ</a>
+        <a class="button primary" href={url("/contact/")}>Contactページ</a>
       </div>
     </div>
   </section>

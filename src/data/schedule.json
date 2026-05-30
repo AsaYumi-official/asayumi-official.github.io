@@ -1,9 +1,42 @@
 [
   {
-    "date": "2026-07-01",
-    "title": "公演情報は準備中です",
-    "place": "詳細未定",
-    "description": "今後の出演予定をこちらに掲載します。",
-    "status": "Coming Soon"
+    "date": "2026-06-01",
+    "time": "18:00",
+    "title": "YouTube動画投稿",
+    "type": "youtube",
+    "label": "YouTube",
+    "location": "YouTube",
+    "url": "https://www.youtube.com/@AsaYumi_ch",
+    "description": "最新動画を公開予定。"
+  },
+  {
+    "date": "2026-06-03",
+    "time": "18:00",
+    "title": "Instagram / TikTok投稿",
+    "type": "sns",
+    "label": "SNS",
+    "location": "Instagram / TikTok",
+    "url": "https://www.instagram.com/asayumi_ch",
+    "description": "ショート動画投稿予定。"
+  },
+  {
+    "date": "2026-07-13",
+    "time": "20:00",
+    "title": "X お知らせ投稿",
+    "type": "sns",
+    "label": "X",
+    "location": "X",
+    "url": "https://x.com/asayumi_ch",
+    "description": "今後の活動情報を投稿予定。"
+  },
+  {
+    "date": "2026-09-21",
+    "time": "14:00",
+    "title": "あさゆみ 2ndリサイタル 大阪公演",
+    "type": "performance",
+    "label": "出演予定",
+    "location": "大阪",
+    "url": "",
+    "description": "大阪でのリサイタル公演。"
   }
 ]

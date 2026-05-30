@@ -1,24 +1,17 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import products from "../data/shop.json";
 
-const url = (href: string) => `${import.meta.env.BASE_URL.replace(/\/?$/, "/")}${href.replace(/^\//, "")}`;
+const shopUrl = "https://asayumishop.stores.jp/";
 ---
 
-<BaseLayout title="Shop | あさゆみ" description="あさゆみの音源、楽譜、グッズなどのショップ情報。">
+<BaseLayout title="Shop | あさゆみ" description="あさゆみのショップはSTORESでご覧いただけます。">
   <section class="section">
-    <div class="section-inner">
+    <div class="section-inner narrow">
       <p class="section-kicker">Shop</p>
-      <h1 class="section-title">Shop</h1>
-      <p class="section-lead">音源、楽譜、グッズなどの販売情報を今後掲載します。</p>
-      <div class="grid" style="margin-top: 34px;">
-        {products.map((product) => (
-          <a class="shop-item" href={url(product.href)}>
-            <strong>{product.name}</strong>
-            <span>{product.description}</span>
-            <span>{product.price}</span>
-          </a>
-        ))}
+      <h1 class="section-title section-title-medium">Shop</h1>
+      <p class="section-lead">音源、楽譜、グッズなどの販売情報はSTORESでご案内します。</p>
+      <div class="button-row">
+        <a class="button primary" href={shopUrl} target="_blank" rel="noopener noreferrer">STORESへ移動</a>
       </div>
     </div>
   </section>

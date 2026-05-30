@@ -3,21 +3,137 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import schedule from "../data/schedule.json";
 ---
 
-<BaseLayout title="Schedule | あさゆみ" description="あさゆみの公演、出演、レッスン、ワークショップ予定。">
+<BaseLayout title="Schedule | あさゆみ" description="あさゆみの出演予定、YouTube投稿予定、SNS投稿予定をカレンダーで確認できます。">
   <section class="section">
     <div class="section-inner">
       <p class="section-kicker">Schedule</p>
-      <h1 class="section-title">出演・開催予定</h1>
-      <div class="grid" style="margin-top: 34px;">
-        {schedule.map((item) => (
-          <article class="schedule-item">
-            <span>{item.date} / {item.status}</span>
-            <strong>{item.title}</strong>
-            <span>{item.place}</span>
-            <span>{item.description}</span>
-          </article>
-        ))}
+      <h1 class="section-title">予定カレンダー</h1>
+      <p class="section-lead">出演予定、動画投稿、SNS投稿などを月ごとに確認できます。</p>
+
+      <div class="calendar-shell" data-schedule={JSON.stringify(schedule)}>
+        <div class="calendar-header">
+          <button type="button" class="calendar-nav" data-prev aria-label="前の月">＜</button>
+          <h2 data-calendar-title></h2>
+          <button type="button" class="calendar-nav" data-next aria-label="次の月">＞</button>
+        </div>
+        <div class="calendar-grid" data-calendar-grid></div>
+        <div class="monthly-events">
+          <h3>当月の予定</h3>
+          <div data-event-list></div>
+        </div>
       </div>
     </div>
   </section>
+
+  <script>
+    type ScheduleEvent = {
+      date: string;
+      time?: string;
+      title: string;
+      type: string;
+      label: string;
+      location?: string;
+      url?: string;
+      description?: string;
+    };
+
+    const shell = document.querySelector<HTMLElement>(".calendar-shell");
+    const title = document.querySelector<HTMLElement>("[data-calendar-title]");
+    const grid = document.querySelector<HTMLElement>("[data-calendar-grid]");
+    const list = document.querySelector<HTMLElement>("[data-event-list]");
+    const prev = document.querySelector<HTMLButtonElement>("[data-prev]");
+    const next = document.querySelector<HTMLButtonElement>("[data-next]");
+    const events = JSON.parse(shell?.dataset.schedule || "[]") as ScheduleEvent[];
+    const labels: Record<string, string> = {
+      performance: "出演予定",
+      youtube: "YouTube",
+      sns: "SNS",
+    };
+    let cursor = new Date();
+    cursor.setDate(1);
+
+    const formatMonth = (date: Date) => `${date.getFullYear()}年 ${date.getMonth() + 1}月`;
+    const pad = (value: number) => String(value).padStart(2, "0");
+    const dateKey = (date: Date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    const eventParts = (value: string) => {
+      const [eventYear, eventMonth, eventDay] = value.split("-").map(Number);
+      return { eventYear, eventMonth: eventMonth - 1, eventDay };
+    };
+
+    function renderCalendar() {
+      if (!title || !grid || !list) return;
+      const year = cursor.getFullYear();
+      const month = cursor.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const monthEvents = events.filter((event) => {
+        const parts = eventParts(event.date);
+        return parts.eventYear === year && parts.eventMonth === month;
+      });
+
+      title.textContent = formatMonth(cursor);
+      grid.innerHTML = "";
+      ["日", "月", "火", "水", "木", "金", "土"].forEach((day) => {
+        const cell = document.createElement("div");
+        cell.className = "calendar-weekday";
+        cell.textContent = day;
+        grid.append(cell);
+      });
+
+      for (let i = 0; i < firstDay.getDay(); i += 1) {
+        const blank = document.createElement("div");
+        blank.className = "calendar-day is-empty";
+        grid.append(blank);
+      }
+
+      for (let day = 1; day <= lastDay.getDate(); day += 1) {
+        const current = new Date(year, month, day);
+        const key = dateKey(current);
+        const dayEvents = monthEvents.filter((event) => event.date === key);
+        const cell = document.createElement("div");
+        cell.className = "calendar-day";
+        cell.innerHTML = `<strong>${day}</strong>`;
+        dayEvents.forEach((event) => {
+          const item = event.url ? document.createElement("a") : document.createElement("span");
+          item.className = `calendar-event ${event.type}`;
+          item.textContent = event.title;
+          if (event.url) {
+            item.setAttribute("href", event.url);
+            item.setAttribute("target", "_blank");
+            item.setAttribute("rel", "noopener noreferrer");
+          }
+          cell.append(item);
+        });
+        grid.append(cell);
+      }
+
+      list.innerHTML = monthEvents.length ? "" : "<p>この月の予定はまだありません。</p>";
+      monthEvents.forEach((event) => {
+        const wrapper = event.url ? document.createElement("a") : document.createElement("article");
+        wrapper.className = "monthly-event-card";
+        if (event.url) {
+          wrapper.setAttribute("href", event.url);
+          wrapper.setAttribute("target", "_blank");
+          wrapper.setAttribute("rel", "noopener noreferrer");
+        }
+        wrapper.innerHTML = `
+          <span>${event.date} ${event.time || ""} / ${labels[event.type] || event.label}</span>
+          <strong>${event.title}</strong>
+          <small>${event.location || ""}</small>
+          <p>${event.description || ""}</p>
+        `;
+        list.append(wrapper);
+      });
+    }
+
+    prev?.addEventListener("click", () => {
+      cursor = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1);
+      renderCalendar();
+    });
+    next?.addEventListener("click", () => {
+      cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+      renderCalendar();
+    });
+    renderCalendar();
+  </script>
 </BaseLayout>

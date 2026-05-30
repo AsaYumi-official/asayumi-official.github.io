@@ -1,0 +1,46 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("news", ({ data }) => data.published);
+  return posts.map((post) => ({
+    params: { slug: post.id.replace(/\.md$/, "") },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
+const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${href.replace(/^\//, "")}`;
+const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+const ogImage = post.data.image || "/images/ogp.jpg";
+---
+
+<BaseLayout
+  title={`${post.data.title} | あさゆみ`}
+  description={post.data.summary}
+  ogImage={ogImage}
+  ogType="article"
+>
+  <article class="section news-detail">
+    <div class="section-inner narrow">
+      <p class="section-kicker">News</p>
+      <time datetime={formatDate(post.data.date)}>{formatDate(post.data.date)}</time>
+      <h1 class="section-title section-title-medium">{post.data.title}</h1>
+      <p class="section-lead">{post.data.summary}</p>
+      {post.data.image && (
+        <img class="news-detail-image" src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} onerror="this.style.display='none'" />
+      )}
+      <div class="article-body">
+        <Content />
+      </div>
+      <div class="button-row">
+        <a class="button secondary" href={url("/news/")}>お知らせ一覧へ戻る</a>
+        <a class="button primary" href={url("/contact/")}>お問い合わせ</a>
+      </div>
+    </div>
+  </article>
+</BaseLayout>

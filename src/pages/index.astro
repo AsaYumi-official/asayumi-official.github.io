@@ -1,47 +1,59 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
 import hero from "../data/homeHero.json";
-import news from "../data/news.json";
 import youtube from "../data/youtube.json";
-import works from "../data/works.json";
+import worksData from "../data/works.json";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
 const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${href.replace(/^\//, "")}`;
 const hasYoutubeVideo = !youtube.url.includes("VIDEO_ID");
+const works = worksData.activities;
+const latestNews = (await getCollection("news", ({ data }) => data.published))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 2);
+const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+const slugFromId = (id: string) => id.replace(/\.md$/, "");
 ---
 
 <BaseLayout>
   <section class="hero">
-    <div class="hero-media">
-      <img src={asset(hero.image)} alt={hero.imageAlt} />
-    </div>
-    <div class="hero-content">
-      <p class="section-kicker">{hero.label}</p>
-      <h1 class="hero-title">{hero.title}</h1>
-      <p class="hero-lead">{hero.lead}</p>
-      <div class="button-row">
-        <a class="button primary" href={url(hero.primaryCta.href)}>{hero.primaryCta.label}</a>
-        <a class="button secondary" href={url(hero.secondaryCta.href)}>{hero.secondaryCta.label}</a>
+    <div class="hero-inner">
+      <div class="hero-content">
+        <p class="section-kicker">{hero.label}</p>
+        <h1 class="hero-title">{hero.title}</h1>
+        <p class="hero-lead">{hero.lead}</p>
+        <div class="button-row">
+          <a class="button primary" href={url(hero.primaryCta.href)}>{hero.primaryCta.label}</a>
+          <a class="button secondary" href={url(hero.secondaryCta.href)}>{hero.secondaryCta.label}</a>
+        </div>
       </div>
+      <figure class="hero-portrait">
+        <img src={asset(hero.image)} alt={hero.imageAlt} onerror="this.style.display='none'" />
+      </figure>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section about-section">
     <div class="section-inner split">
       <div>
         <p class="section-kicker">About</p>
-        <h2 class="section-title">藝大卒声楽家夫婦 あさゆみ</h2>
+        <h2 class="section-title about-title">
+          <span>旭（あさひ）と ゆみで</span>
+          <span>“あさゆみ”です。</span>
+        </h2>
       </div>
       <div class="prose">
         <p>
-          あさゆみは、東京藝術大学で学んだ声楽を軸に活動する
-          ソプラノとバリトンの夫婦デュオです。
+          あさゆみは、東京藝術大学で学んだ声楽家夫婦によるクラシック vocal duo です。
+          コンサート、式典、学校公演、レッスン、ワークショップ、メディア出演まで、
+          目的に合わせた音楽体験を丁寧に設計します。
+          全国どこへでも歌いに参ります。
         </p>
-        <p>
-          コンサート、学校公演、式典、パーティー、YouTubeなど、
-          場に合わせたプログラムで全国どこへでも歌いに参ります。
-        </p>
+        <div class="button-row">
+          <a class="button secondary" href={url("/profile/")}>Profile</a>
+        </div>
       </div>
     </div>
   </section>
@@ -50,14 +62,22 @@ const hasYoutubeVideo = !youtube.url.includes("VIDEO_ID");
     <div class="section-inner">
       <p class="section-kicker">News</p>
       <h2 class="section-title">お知らせ</h2>
-      <div class="grid" style="margin-top: 34px;">
-        {news.map((item) => (
-          <a class="card" href={url(item.href)}>
-            <time datetime={item.date}>{item.date}</time>
-            <h3>{item.title}</h3>
-            <p>{item.body}</p>
+      <div class="news-list compact-news">
+        {latestNews.map((post) => (
+          <a class="news-card" href={url(`/news/${slugFromId(post.id)}/`)}>
+            <div>
+              <time datetime={formatDate(post.data.date)}>{formatDate(post.data.date)}</time>
+              <h3>{post.data.title}</h3>
+              <p>{post.data.summary}</p>
+            </div>
+            {post.data.image && (
+              <img src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} loading="lazy" onerror="this.style.display='none'" />
+            )}
           </a>
         ))}
+      </div>
+      <div class="button-row centered">
+        <a class="button secondary" href={url("/news/")}>お知らせを見る</a>
       </div>
     </div>
   </section>
@@ -65,7 +85,7 @@ const hasYoutubeVideo = !youtube.url.includes("VIDEO_ID");
   <section class="section">
     <div class="section-inner">
       <p class="section-kicker">YouTube</p>
-      <h2 class="section-title">{youtube.title}</h2>
+      <h2 class="section-title section-title-medium">{youtube.title}</h2>
       <p class="section-lead">{youtube.caption}</p>
       {hasYoutubeVideo ? (
         <iframe
@@ -81,6 +101,9 @@ const hasYoutubeVideo = !youtube.url.includes("VIDEO_ID");
           <span>YouTube URL 準備中</span>
         </div>
       )}
+      <div class="button-row centered">
+        <a class="button secondary" href={youtube.channelUrl} target="_blank" rel="noopener noreferrer">YouTubeを見る</a>
+      </div>
     </div>
   </section>
 
@@ -88,7 +111,10 @@ const hasYoutubeVideo = !youtube.url.includes("VIDEO_ID");
     <div class="section-inner">
       <p class="section-kicker">WORKS</p>
       <p class="section-kicker muted-kicker">活動内容</p>
-      <h2 class="section-title">さまざまな場へ、歌を届けています</h2>
+      <h2 class="section-title works-title">
+        <span>さまざまな場へ、</span>
+        <span>歌を届けています</span>
+      </h2>
       <div class="works-gallery" aria-label="あさゆみの活動写真">
         {works.slice(0, 3).map((work) => (
           <figure class="works-photo">
@@ -99,14 +125,14 @@ const hasYoutubeVideo = !youtube.url.includes("VIDEO_ID");
       </div>
       <div class="works-summary">
         <ul>
-          {works.map((work) => <li>{work.title}</li>)}
+          {works.map((work) => <li class={work.highlight ? "highlight-item" : ""}>{work.title}</li>)}
         </ul>
         <p>
           コンサートや学校公演、式典演奏、レッスンまで、会場や目的に合わせた歌の時間を丁寧に構成します。
         </p>
       </div>
       <div class="button-row centered">
-        <a class="button secondary" href={url("/works/")}>Worksを見る</a>
+        <a class="button secondary" href={url("/works/")}>活動を見る</a>
       </div>
     </div>
   </section>

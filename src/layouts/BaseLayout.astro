@@ -4,16 +4,18 @@ import Footer from "../components/Footer.astro";
 import "../styles/global.css";
 
 const {
-  title = "あさゆみ | Asayumi Official Site",
-  description = "東京藝術大学卒の声楽家夫婦デュオ「あさゆみ」の公式サイト。演奏依頼、レッスン、取材のお問い合わせはこちらから。",
-  ogImage = "/images/hero-asayumi-placeholder.png",
+  title = "あさゆみ | AsaYumi Official",
+  description = "東京藝術大学卒の声楽家夫婦デュオ。ソプラノ × バリトンの歌声で、クラシックからポップスまで幅広くお届けします。",
+  ogImage = "/images/ogp.jpg",
+  ogType = "website",
 } = Astro.props;
 
 const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
-const canonical = new URL(Astro.url.pathname, Astro.site);
+const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://asayumi-official.github.io");
 const ogImageUrl = ogImage.startsWith("http")
   ? ogImage
-  : new URL(`${basePath}${ogImage.replace(/^\//, "")}`, Astro.site);
+  : new URL(`${basePath}${ogImage.replace(/^\//, "")}`, Astro.site ?? "https://asayumi-official.github.io");
 ---
 
 <!doctype html>
@@ -24,10 +26,13 @@ const ogImageUrl = ogImage.startsWith("http")
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <meta property="og:site_name" content="あさゆみ | Asayumi Official Site" />
+    <link rel="icon" href={url("/favicon.svg")} type="image/svg+xml" />
+    <link rel="icon" href={url("/favicon-32x32.png")} sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href={url("/apple-touch-icon.png")} />
+    <meta property="og:site_name" content="あさゆみ | AsaYumi Official" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImageUrl} />
     <meta name="twitter:card" content="summary_large_image" />

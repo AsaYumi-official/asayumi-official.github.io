@@ -1,14 +1,22 @@
 [
   {
     "label": "YouTube",
-    "href": "https://www.youtube.com/"
+    "shortLabel": "YT",
+    "href": "https://www.youtube.com/@AsaYumi_ch"
   },
   {
     "label": "Instagram",
-    "href": "https://www.instagram.com/"
+    "shortLabel": "IG",
+    "href": "https://www.instagram.com/asayumi_ch"
+  },
+  {
+    "label": "TikTok",
+    "shortLabel": "TT",
+    "href": "https://www.tiktok.com/@asayumi_ch"
   },
   {
     "label": "X",
-    "href": "https://x.com/"
+    "shortLabel": "X",
+    "href": "https://x.com/asayumi_ch"
   }
 ]
