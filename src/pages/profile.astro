@@ -39,8 +39,8 @@ const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${h
         ))}
       </div>
       <div class="profile-gallery">
-        {profile.gallery.map((item) => (
-          <figure>
+        {profile.gallery.map((item, index) => (
+          <figure class:list={[index === 0 && "profile-gallery-primary"]}>
             <img src={asset(item.image)} alt={item.imageAlt} loading="lazy" onerror="this.style.display='none'" />
           </figure>
         ))}

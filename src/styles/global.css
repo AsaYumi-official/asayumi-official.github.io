@@ -670,6 +670,10 @@ iframe.youtube-frame {
   line-height: 1.85;
 }
 
+.profile-member .prose p {
+  white-space: pre-line;
+}
+
 .profile-member .prose p + p {
   margin-top: 0.86em;
 }
@@ -730,6 +734,12 @@ iframe.youtube-frame {
   object-fit: contain;
   object-position: center top;
   width: 100%;
+}
+
+.profile-gallery-primary img {
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+  object-position: center 36%;
 }
 
 .filter-bar {
@@ -936,15 +946,18 @@ iframe.youtube-frame {
   gap: 18px;
 }
 
-.contact-form label {
+.contact-form label,
+.checkbox-field {
   display: grid;
   gap: 8px;
 }
 
-.contact-form label span {
+.contact-form label span,
+.checkbox-field p {
   color: var(--ink);
   font-size: 0.95rem;
   line-height: 1.5;
+  margin: 0;
 }
 
 .contact-form input,
@@ -961,6 +974,17 @@ iframe.youtube-frame {
 
 .contact-form textarea {
   resize: vertical;
+}
+
+.checkbox-inline {
+  align-items: center;
+  display: flex !important;
+  gap: 10px;
+}
+
+.checkbox-inline input {
+  min-height: 0;
+  width: auto;
 }
 
 .contact-form input::placeholder,
@@ -1087,10 +1111,6 @@ iframe.youtube-frame {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .form-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .form-grid .full {
     grid-column: 1 / -1;
   }
@@ -1099,6 +1119,10 @@ iframe.youtube-frame {
     align-items: start;
     gap: clamp(34px, 5vw, 58px);
     grid-template-columns: minmax(300px, 340px) minmax(0, 1fr);
+  }
+
+  .profile-member figure {
+    margin-top: 14px;
   }
 
   .profile-gallery {

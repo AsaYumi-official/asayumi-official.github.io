@@ -1,7 +1,6 @@
 {
   "title": "YouTube最新動画",
-  "url": "https://www.youtube.com/embed?listType=user_uploads&list=AsaYumi_ch",
-  "caption": "最新動画をYouTubeチャンネルから表示します。",
+  "fallbackVideoId": "",
   "channelUrl": "https://www.youtube.com/@AsaYumi_ch",
   "handle": "AsaYumi_ch",
   "feedUrl": ""

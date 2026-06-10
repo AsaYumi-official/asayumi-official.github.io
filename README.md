@@ -62,7 +62,7 @@ Pages CMS などを後から導入しやすいように、更新頻度の高い�
 | Schedule | `src/data/schedule.json` |
 | Works | `src/data/works.json` |
 | Profile | `src/data/profile.json` |
-| YouTube 最新動画URL | `src/data/youtube.json` |
+| YouTube 最新動画 | `src/data/youtube.json` |
 | FAQ | `src/data/faq.json` |
 | SNSリンク | `src/data/sns.json` |
 | Contactフォーム | `src/data/contact.json` |
@@ -124,9 +124,9 @@ Works ページで使うカテゴリは、現在以下に絞っています。
 
 ### YouTube 最新動画
 
-`src/data/youtube.json` にチャンネルURLとfallback用の埋め込みURLを置いています。ビルド時には `src/lib/youtube.ts` が YouTube チャンネルページからチャンネルIDを解決し、RSSから最新動画を取得します。
+`src/data/youtube.json` にチャンネルURLとfallback用の `fallbackVideoId` を置いています。ビルド時には `src/lib/youtube.ts` が YouTube チャンネルページからチャンネルIDを解決し、RSSから最新動画の videoId を取得します。
 
-取得に失敗した場合は `src/data/youtube.json` の `url` を表示します。GitHub Pages は静的サイトのため、最新動画の自動反映には再ビルドが必要です。`.github/workflows/deploy.yml` では1日1回の定期ビルドと手動実行 `workflow_dispatch` を設定しています。
+取得に失敗した場合は `fallbackVideoId` が設定されていればその動画を表示し、未設定なら壊れたiframeを出さずにYouTubeチャンネルへの導線だけを表示します。GitHub Pages は静的サイトのため、最新動画の自動反映には再ビルドが必要です。`.github/workflows/deploy.yml` では1日1回の定期ビルドと手動実行 `workflow_dispatch` を設定しています。
 
 ### Google Sheets 簡易CMS化の方針
 
@@ -173,7 +173,7 @@ Google Sheets JSON endpointを使う場合も、取得失敗時はローカルJS
 
 ## 公開前に差し替える項目
 
-- `src/data/youtube.json` の `url`
+- `src/data/youtube.json` の `fallbackVideoId`
 - `src/data/contact.json` の Google Apps Script Web App URL
 - `src/data/homeHero.json` の `image`
 - `public/images/` 配下のロゴ、プロフィール、Works、News、OGP画像
