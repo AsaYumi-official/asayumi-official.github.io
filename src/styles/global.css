@@ -598,29 +598,56 @@ main {
   margin: 0;
 }
 
-.youtube-frame {
-  align-items: center;
-  aspect-ratio: 16 / 9;
-  background: var(--ink);
-  border: 0;
+.youtube-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 34px;
+}
+
+.youtube-card {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line);
   border-radius: 8px;
-  box-shadow: var(--shadow);
-  color: var(--paper);
-  display: flex;
-  justify-content: center;
+  overflow: hidden;
+}
+
+.youtube-embed {
+  aspect-ratio: 16 / 9;
+  border: 0;
+  display: block;
   width: 100%;
 }
 
-iframe.youtube-frame {
-  display: block;
+.youtube-card-body {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
 }
 
-.youtube-frame.placeholder span {
-  color: rgba(255, 253, 248, 0.76);
+.youtube-card-body p {
+  color: var(--wine);
   font-family: system-ui, sans-serif;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: 0;
 }
 
-.contact-list {
+.youtube-card-body h3 {
+  font-size: 1.08rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.youtube-card-body a {
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-size: 0.86rem;
+  margin-top: 2px;
+}
+
+.contact-list,
+.contact-tabs {
   display: grid;
   gap: 14px;
   margin-top: 34px;
@@ -628,6 +655,7 @@ iframe.youtube-frame {
 
 .contact-list a,
 .contact-category-card,
+.contact-tab,
 .schedule-item,
 .shop-item {
   align-items: start;
@@ -645,7 +673,14 @@ iframe.youtube-frame {
   text-align: left;
 }
 
-.contact-category-card[aria-pressed="true"] {
+.contact-tab {
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.contact-category-card[aria-pressed="true"],
+.contact-tab[aria-pressed="true"] {
   border-color: var(--wine);
   box-shadow: 0 0 0 1px rgba(141, 78, 69, 0.16);
 }
@@ -730,16 +765,22 @@ iframe.youtube-frame {
 .profile-gallery img {
   aspect-ratio: 4 / 3;
   background: var(--paper);
-  height: auto;
-  object-fit: contain;
-  object-position: center top;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 38%;
   width: 100%;
 }
 
-.profile-gallery-primary img {
-  aspect-ratio: 5 / 4;
-  object-fit: cover;
-  object-position: center 36%;
+.profile-gallery-card {
+  aspect-ratio: 4 / 3;
+}
+
+.profile-gallery-left img {
+  object-position: center 34%;
+}
+
+.profile-gallery-right img {
+  object-position: center 38%;
 }
 
 .filter-bar {
@@ -1015,6 +1056,7 @@ iframe.youtube-frame {
 }
 
 .contact-list strong,
+.contact-tabs strong,
 .schedule-item strong,
 .shop-item strong {
   font-size: 1.1rem;
@@ -1022,6 +1064,7 @@ iframe.youtube-frame {
 }
 
 .contact-list span,
+.contact-tabs span,
 .schedule-item span,
 .shop-item span {
   color: var(--muted);
@@ -1097,6 +1140,10 @@ iframe.youtube-frame {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .youtube-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .works-photo {
     aspect-ratio: 4 / 5;
     min-height: 0;
@@ -1107,7 +1154,8 @@ iframe.youtube-frame {
     grid-template-columns: 0.9fr 1.1fr;
   }
 
-  .contact-list {
+  .contact-list,
+  .contact-tabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
