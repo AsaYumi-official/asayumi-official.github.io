@@ -124,9 +124,11 @@ Works ページで使うカテゴリは、現在以下に絞っています。
 
 ### YouTube 最新動画
 
-`src/data/youtube.json` にチャンネルURLとfallback用の `fallbackVideoId` を置いています。ビルド時には `src/lib/youtube.ts` が YouTube チャンネルページからチャンネルIDを解決し、RSSから最新動画の videoId を取得します。
+`src/data/youtube.json` にHomeへ固定表示する3本の動画を置いています。
 
-取得に失敗した場合は `fallbackVideoId` が設定されていればその動画を表示し、未設定なら壊れたiframeを出さずにYouTubeチャンネルへの導線だけを表示します。GitHub Pages は静的サイトのため、最新動画の自動反映には再ビルドが必要です。`.github/workflows/deploy.yml` では1日1回の定期ビルドと手動実行 `workflow_dispatch` を設定しています。
+各動画は `title` / `subtitle` / `url` / `videoId` を持ちます。iframe には `videoId` から生成した `https://www.youtube-nocookie.com/embed/{videoId}` だけを使います。`videoId` が空の場合のみ `url` から抽出し、取得できない場合はそのカードのiframeを出さずにYouTubeへのリンクだけを表示します。
+
+`.github/workflows/deploy.yml` では1日1回の定期ビルドと手動実行 `workflow_dispatch` を設定しています。現在のYouTube表示は固定データのため、動画差し替え時は `src/data/youtube.json` を更新して再ビルドします。
 
 ### Google Sheets 簡易CMS化の方針
 
@@ -169,11 +171,11 @@ Schedule:
 - `url`
 - `description`
 
-Google Sheets JSON endpointを使う場合も、取得失敗時はローカルJSON/Markdownをfallbackとして使う構成にします。GitHub Actionsの定期ビルドにより、YouTube最新動画と同じタイミングで外部データも反映できます。
+Google Sheets JSON endpointを使う場合も、取得失敗時はローカルJSON/Markdownをfallbackとして使う構成にします。GitHub Actionsの定期ビルドにより、外部データを定期的に反映できます。
 
 ## 公開前に差し替える項目
 
-- `src/data/youtube.json` の `fallbackVideoId`
+- `src/data/youtube.json` の `videos`
 - `src/data/contact.json` の Google Apps Script Web App URL
 - `src/data/homeHero.json` の `image`
 - `public/images/` 配下のロゴ、プロフィール、Works、News、OGP画像

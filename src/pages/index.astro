@@ -4,13 +4,10 @@ import { getCollection } from "astro:content";
 import hero from "../data/homeHero.json";
 import youtube from "../data/youtube.json";
 import { getWorksData } from "../lib/contentSources";
-import { getLatestYouTubeVideo } from "../lib/youtube";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
 const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${href.replace(/^\//, "")}`;
-const latestVideo = await getLatestYouTubeVideo(youtube);
-const hasYoutubeVideo = Boolean(latestVideo.embedUrl);
 const worksData = await getWorksData();
 const works = worksData.activities;
 const latestNews = (await getCollection("news", ({ data }) => data.published))
@@ -18,6 +15,22 @@ const latestNews = (await getCollection("news", ({ data }) => data.published))
   .slice(0, 2);
 const formatDate = (date: Date) => date.toISOString().slice(0, 10);
 const slugFromId = (id: string) => id.replace(/\.md$/, "");
+const videoIdPattern = /^[0-9A-Za-z_-]{11}$/;
+const videoIdFromUrl = (href: string) => {
+  try {
+    const parsed = new URL(href);
+    if (parsed.hostname.includes("youtu.be")) return parsed.pathname.replace("/", "");
+    if (parsed.pathname.startsWith("/shorts/")) return parsed.pathname.split("/")[2] || "";
+    return parsed.searchParams.get("v") || "";
+  } catch {
+    return "";
+  }
+};
+const youtubeVideos = youtube.videos.map((video) => {
+  const videoId = videoIdPattern.test(video.videoId) ? video.videoId : videoIdFromUrl(video.url);
+  const embedUrl = videoIdPattern.test(videoId) ? `https://www.youtube-nocookie.com/embed/${videoId}` : "";
+  return { ...video, videoId, embedUrl };
+});
 ---
 
 <BaseLayout>
@@ -88,22 +101,28 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
     <div class="section-inner">
       <p class="section-kicker">YouTube</p>
       <h2 class="section-title section-title-medium">{youtube.title}</h2>
-      {hasYoutubeVideo ? (
-        <iframe
-          class="youtube-frame"
-          style="margin-top: 34px;"
-          src={latestVideo.embedUrl}
-          title={latestVideo.title}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen
-        ></iframe>
-      ) : (
-        <div class="youtube-frame placeholder" style="margin-top: 34px;">
-          <span>最新動画はYouTubeチャンネルでご覧ください</span>
-        </div>
-      )}
+      <div class="youtube-grid">
+        {youtubeVideos.map((video) => (
+          <article class="youtube-card">
+            {video.embedUrl && (
+              <iframe
+                class="youtube-embed"
+                src={video.embedUrl}
+                title={video.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+              ></iframe>
+            )}
+            <div class="youtube-card-body">
+              <p>{video.subtitle}</p>
+              <h3>{video.title}</h3>
+              <a href={video.url} target="_blank" rel="noopener noreferrer">YouTubeで見る</a>
+            </div>
+          </article>
+        ))}
+      </div>
       <div class="button-row centered">
-        <a class="button secondary" href={latestVideo.channelUrl} target="_blank" rel="noopener noreferrer">YouTubeを見る</a>
+        <a class="button secondary" href={youtube.channelUrl} target="_blank" rel="noopener noreferrer">YouTubeを見る</a>
       </div>
     </div>
   </section>
