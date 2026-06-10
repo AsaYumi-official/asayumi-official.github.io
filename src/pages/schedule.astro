@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import schedule from "../data/schedule.json";
+import { getScheduleData } from "../lib/contentSources";
+
+const schedule = await getScheduleData();
 ---
 
 <BaseLayout title="Schedule | あさゆみ" description="あさゆみの出演予定、YouTube投稿予定、SNS投稿予定をカレンダーで確認できます。">

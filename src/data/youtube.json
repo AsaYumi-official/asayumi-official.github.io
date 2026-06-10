@@ -1,7 +1,8 @@
 {
   "title": "YouTube最新動画",
-  "url": "https://www.youtube.com/embed/VIDEO_ID",
-  "caption": "最新動画のURLはこのJSONを更新すると差し替えられます。",
+  "url": "https://www.youtube.com/embed?listType=user_uploads&list=AsaYumi_ch",
+  "caption": "最新動画をYouTubeチャンネルから表示します。",
   "channelUrl": "https://www.youtube.com/@AsaYumi_ch",
-  "feedUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID"
+  "handle": "AsaYumi_ch",
+  "feedUrl": ""
 }

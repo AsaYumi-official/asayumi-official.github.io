@@ -289,8 +289,12 @@ main {
   line-height: 2;
   margin: 22px 0 0;
   max-width: 760px;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   word-break: keep-all;
+}
+
+.desktop-break {
+  display: none;
 }
 
 .button-row {
@@ -373,7 +377,7 @@ main {
   color: var(--muted);
   font-size: 1rem;
   line-height: 2;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   word-break: keep-all;
 }
 
@@ -485,7 +489,8 @@ main {
   font-size: 1.18rem;
   line-height: 1.5;
   margin: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: keep-all;
 }
 
 .news-card p {
@@ -659,6 +664,14 @@ iframe.youtube-frame {
 .profile-member {
   display: grid;
   gap: 28px;
+}
+
+.profile-member .prose {
+  line-height: 1.85;
+}
+
+.profile-member .prose p + p {
+  margin-top: 0.86em;
 }
 
 .profile-member figure,
@@ -950,6 +963,15 @@ iframe.youtube-frame {
   resize: vertical;
 }
 
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: rgba(117, 111, 102, 0.68);
+}
+
+[data-form-intro] {
+  white-space: pre-line;
+}
+
 .honeypot,
 .hidden-submit-frame {
   border: 0;
@@ -1035,6 +1057,10 @@ iframe.youtube-frame {
     display: flex;
   }
 
+  .desktop-break {
+    display: block;
+  }
+
   .mobile-nav {
     display: none;
   }
@@ -1071,7 +1097,8 @@ iframe.youtube-frame {
 
   .profile-member {
     align-items: start;
-    grid-template-columns: 280px minmax(0, 1fr);
+    gap: clamp(34px, 5vw, 58px);
+    grid-template-columns: minmax(300px, 340px) minmax(0, 1fr);
   }
 
   .profile-gallery {

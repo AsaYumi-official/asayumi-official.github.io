@@ -3,12 +3,14 @@ type YouTubeConfig = {
   url: string;
   caption: string;
   channelUrl: string;
+  handle?: string;
   feedUrl?: string;
 };
 
 type LatestVideo = {
   title: string;
   url: string;
+  embedUrl: string;
   caption: string;
   channelUrl: string;
 };
@@ -29,23 +31,36 @@ const textFromXml = (xml: string, tag: string) => {
 };
 
 const toEmbedUrl = (videoId: string) => `https://www.youtube.com/embed/${videoId}`;
+const toWatchUrl = (videoId: string) => `https://www.youtube.com/watch?v=${videoId}`;
+
+const resolveFeedUrl = async (config: YouTubeConfig) => {
+  const meta = import.meta as ImportMeta & { env?: Record<string, string | undefined> };
+  const channelId = meta.env?.YOUTUBE_CHANNEL_ID;
+  if (channelId) return `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+  if (config.feedUrl) return config.feedUrl;
+
+  const handle = config.handle || config.channelUrl.match(/@([^/?#]+)/)?.[1];
+  if (!handle) return "";
+
+  const page = await timeoutFetch(`https://www.youtube.com/@${handle}`);
+  if (!page.ok) return "";
+  const html = await page.text();
+  const resolvedId = html.match(/"channelId":"(UC[^"]+)"/)?.[1]
+    || html.match(/youtube\.com\/channel\/(UC[0-9A-Za-z_-]+)/)?.[1];
+  return resolvedId ? `https://www.youtube.com/feeds/videos.xml?channel_id=${resolvedId}` : "";
+};
 
 export async function getLatestYouTubeVideo(config: YouTubeConfig): Promise<LatestVideo> {
   const fallback: LatestVideo = {
     title: config.title,
     url: config.url,
+    embedUrl: config.url,
     caption: config.caption,
     channelUrl: config.channelUrl,
   };
 
   try {
-    const meta = import.meta as ImportMeta & { env?: Record<string, string | undefined> };
-    const channelId = meta.env?.YOUTUBE_CHANNEL_ID;
-    const feedUrl = channelId
-      ? `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`
-      : config.feedUrl && !config.feedUrl.includes("CHANNEL_ID")
-        ? config.feedUrl
-        : "";
+    const feedUrl = await resolveFeedUrl(config);
     if (!feedUrl) return fallback;
 
     const feed = await timeoutFetch(feedUrl);
@@ -60,7 +75,8 @@ export async function getLatestYouTubeVideo(config: YouTubeConfig): Promise<Late
 
     return {
       title: title || config.title,
-      url: toEmbedUrl(videoId),
+      url: toWatchUrl(videoId),
+      embedUrl: toEmbedUrl(videoId),
       caption: title ? `最新動画: ${title}` : config.caption,
       channelUrl: config.channelUrl,
     };
