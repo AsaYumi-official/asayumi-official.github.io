@@ -16,7 +16,7 @@ const achievements = [...worksData.achievements].sort((a, b) => b.date.localeCom
 
       <div class="filter-bar" aria-label="実績カテゴリ">
         {categories.map((category, index) => (
-          <button class="filter-button" type="button" data-filter={category} aria-pressed={index === 0 ? "true" : "false"}>{category}</button>
+          <button class:list={["filter-button", index === 0 && "is-active"]} type="button" data-filter={category} aria-pressed={index === 0 ? "true" : "false"}>{category}</button>
         ))}
       </div>
 
@@ -48,10 +48,15 @@ const achievements = [...worksData.achievements].sort((a, b) => b.date.localeCom
     buttons.forEach((button) => {
       button.addEventListener("click", () => {
         const filter = button.dataset.filter || "すべて";
-        buttons.forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+        buttons.forEach((item) => {
+          const active = item === button;
+          item.setAttribute("aria-pressed", String(active));
+          item.classList.toggle("is-active", active);
+        });
         cards.forEach((card) => {
           const matches = filter === "すべて" || card.dataset.category === filter;
           card.hidden = !matches;
+          card.classList.toggle("is-hidden", !matches);
         });
       });
     });

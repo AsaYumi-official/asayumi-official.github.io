@@ -4,11 +4,13 @@ import { getCollection } from "astro:content";
 import hero from "../data/homeHero.json";
 import youtube from "../data/youtube.json";
 import worksData from "../data/works.json";
+import { getLatestYouTubeVideo } from "../lib/youtube";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
 const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${href.replace(/^\//, "")}`;
-const hasYoutubeVideo = !youtube.url.includes("VIDEO_ID");
+const latestVideo = await getLatestYouTubeVideo(youtube);
+const hasYoutubeVideo = !latestVideo.url.includes("VIDEO_ID");
 const works = worksData.activities;
 const latestNews = (await getCollection("news", ({ data }) => data.published))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
@@ -40,16 +42,15 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
       <div>
         <p class="section-kicker">About</p>
         <h2 class="section-title about-title">
-          <span>旭（あさひ）と ゆみで</span>
-          <span>“あさゆみ”です。</span>
+          <span><b>旭</b><small>（あさひ）と</small> <b>ゆみ</b><small>で</small></span>
+          <span><small>“</small><b>あさゆみ</b><small>”です。</small></span>
         </h2>
       </div>
       <div class="prose">
         <p>
-          あさゆみは、東京藝術大学で学んだ声楽家夫婦によるクラシック vocal duo です。
-          コンサート、式典、学校公演、レッスン、ワークショップ、メディア出演まで、
-          目的に合わせた音楽体験を丁寧に設計します。
-          全国どこへでも歌いに参ります。
+          あさゆみは、東京藝術大学で学んだ声楽家夫婦によるソプラノとバリトンのデュオです。
+          クラシックからポップスまで、幅広い歌を届けています。
+          演奏会をはじめ、式典やパーティー、学校、各種施設での公演など、全国どこへでも歌いに参ります。
         </p>
         <div class="button-row">
           <a class="button secondary" href={url("/profile/")}>Profile</a>
@@ -86,12 +87,12 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
     <div class="section-inner">
       <p class="section-kicker">YouTube</p>
       <h2 class="section-title section-title-medium">{youtube.title}</h2>
-      <p class="section-lead">{youtube.caption}</p>
+      <p class="section-lead">{latestVideo.caption}</p>
       {hasYoutubeVideo ? (
         <iframe
           class="youtube-frame"
           style="margin-top: 34px;"
-          src={youtube.url}
+          src={latestVideo.url}
           title="あさゆみ YouTube 最新動画"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowfullscreen
@@ -102,7 +103,7 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
         </div>
       )}
       <div class="button-row centered">
-        <a class="button secondary" href={youtube.channelUrl} target="_blank" rel="noopener noreferrer">YouTubeを見る</a>
+        <a class="button secondary" href={latestVideo.channelUrl} target="_blank" rel="noopener noreferrer">YouTubeを見る</a>
       </div>
     </div>
   </section>
@@ -125,10 +126,10 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
       </div>
       <div class="works-summary">
         <ul>
-          {works.map((work) => <li class={work.highlight ? "highlight-item" : ""}>{work.title}</li>)}
+          {works.map((work) => <li>{work.title}</li>)}
         </ul>
         <p>
-          コンサートや学校公演、式典演奏、レッスンまで、会場や目的に合わせた歌の時間を丁寧に構成します。
+          上記に該当しないお仕事でもお気軽にご相談ください
         </p>
       </div>
       <div class="button-row centered">
@@ -140,7 +141,7 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
   <section class="section">
     <div class="section-inner">
       <p class="section-kicker">Contact</p>
-      <h2 class="section-title">演奏・レッスン・取材のご相談</h2>
+      <h2 class="section-title">お問い合わせ</h2>
       <p class="section-lead">ご希望の内容、時期、会場、対象者、予算感などを添えてお問い合わせください。</p>
       <div class="button-row">
         <a class="button primary" href={url("/contact/")}>問い合わせる</a>

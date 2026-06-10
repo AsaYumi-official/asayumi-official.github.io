@@ -74,9 +74,9 @@ main {
 
 .brand-mark-image {
   align-items: center;
-  background: var(--ink);
+  background: transparent;
   border-radius: 999px;
-  color: var(--paper);
+  color: var(--ink);
   display: inline-flex;
   font-size: 0.9rem;
   height: 34px;
@@ -85,17 +85,15 @@ main {
   width: 34px;
 }
 
+.brand-mark-image picture,
 .brand-mark-image img {
+  display: block;
   height: 34px;
   object-fit: contain;
   width: 34px;
 }
 
 .brand-mark-image span {
-  position: absolute;
-}
-
-.brand-mark-image img:not([style*="display: none"]) + span {
   display: none;
 }
 
@@ -162,12 +160,31 @@ main {
   height: 34px;
   justify-content: center;
   min-width: 34px;
-  padding: 0 8px;
+  padding: 0;
 }
 
 .social-button:hover {
   border-color: var(--ink);
   color: var(--ink);
+}
+
+.social-button svg {
+  height: 17px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+  width: 17px;
+}
+
+.social-button svg * {
+  fill: none;
+  stroke: currentColor;
+}
+
+.social-button svg.fill-icon * {
+  fill: currentColor;
+  stroke: none;
 }
 
 .mobile-nav {
@@ -272,6 +289,8 @@ main {
   line-height: 2;
   margin: 22px 0 0;
   max-width: 760px;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
 }
 
 .button-row {
@@ -354,6 +373,8 @@ main {
   color: var(--muted);
   font-size: 1rem;
   line-height: 2;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
 }
 
 .prose p {
@@ -381,10 +402,13 @@ main {
 }
 
 .hero-title {
-  font-size: clamp(4.6rem, 22vw, 10rem);
+  font-size: clamp(4.2rem, 16vw, 10rem);
   font-weight: 400;
   line-height: 0.95;
   margin: 0;
+  overflow-wrap: normal;
+  text-wrap: nowrap;
+  word-break: keep-all;
 }
 
 .hero-lead {
@@ -414,6 +438,21 @@ main {
 .about-title span,
 .works-title span {
   display: block;
+}
+
+.about-title {
+  font-size: clamp(2.2rem, 6.6vw, 4.9rem);
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+.about-title b {
+  font-weight: 500;
+}
+
+.about-title small {
+  font-size: 0.58em;
+  font-weight: 500;
 }
 
 .news-list {
@@ -550,11 +589,6 @@ main {
   content: "・";
 }
 
-.works-summary .highlight-item {
-  color: var(--wine);
-  font-weight: 700;
-}
-
 .works-summary p {
   margin: 0;
 }
@@ -588,6 +622,7 @@ iframe.youtube-frame {
 }
 
 .contact-list a,
+.contact-category-card,
 .schedule-item,
 .shop-item {
   align-items: start;
@@ -597,6 +632,17 @@ iframe.youtube-frame {
   display: grid;
   gap: 8px;
   padding: 20px;
+}
+
+.contact-category-card {
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.contact-category-card[aria-pressed="true"] {
+  border-color: var(--wine);
+  box-shadow: 0 0 0 1px rgba(141, 78, 69, 0.16);
 }
 
 .centered-copy {
@@ -636,7 +682,26 @@ iframe.youtube-frame {
   font-size: clamp(1.7rem, 5vw, 2.8rem);
   font-weight: 500;
   line-height: 1.25;
-  margin: 0 0 18px;
+  margin: 0 0 8px;
+}
+
+.voice-label {
+  color: var(--wine);
+  font-family: system-ui, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: 0 0 12px;
+}
+
+.name-reading {
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-family: system-ui, sans-serif;
+  font-size: 0.86rem;
+  gap: 8px 14px;
+  margin: 0 0 22px;
 }
 
 .profile-gallery {
@@ -647,8 +712,10 @@ iframe.youtube-frame {
 
 .profile-gallery img {
   aspect-ratio: 4 / 3;
+  background: var(--paper);
   height: auto;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center top;
   width: 100%;
 }
 
@@ -670,10 +737,15 @@ iframe.youtube-frame {
   padding: 8px 14px;
 }
 
-.filter-button[aria-pressed="true"] {
+.filter-button[aria-pressed="true"],
+.filter-button.is-active {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--paper);
+}
+
+.work-result-card.is-hidden {
+  display: none;
 }
 
 .works-results {
@@ -838,6 +910,64 @@ iframe.youtube-frame {
   margin: 0;
 }
 
+.contact-form {
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-top: 34px;
+  padding: clamp(20px, 4vw, 34px);
+}
+
+.form-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.contact-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.contact-form label span {
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.contact-form input,
+.contact-form select,
+.contact-form textarea {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  min-height: 46px;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.contact-form textarea {
+  resize: vertical;
+}
+
+.honeypot,
+.hidden-submit-frame {
+  border: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  width: 0;
+}
+
+.form-status {
+  color: var(--wine);
+  font-family: system-ui, sans-serif;
+  line-height: 1.7;
+  margin: 18px 0 0;
+}
+
 .contact-list strong,
 .schedule-item strong,
 .shop-item strong {
@@ -929,6 +1059,14 @@ iframe.youtube-frame {
 
   .contact-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-grid .full {
+    grid-column: 1 / -1;
   }
 
   .profile-member {

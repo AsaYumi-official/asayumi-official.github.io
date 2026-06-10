@@ -1,7 +1,7 @@
 {
   "activities": [
     {
-      "title": "コンサート／リサイタル出演",
+      "title": "コンサート／リサイタル企画・出演",
       "category": "コンサート",
       "description": "ホール公演、サロンコンサート、リサイタルなど、声楽を軸にした演奏をお届けします。",
       "image": "/images/works_01.jpg",
@@ -29,12 +29,12 @@
       "imageAlt": "レッスンやワークショップの活動写真"
     },
     {
-      "title": "アニメ・映画など歌入り劇伴のレコーディング",
+      "title": "アニメ・映画など歌入り劇伴歌唱／企業ソングのレコーディング",
       "category": "レコーディング",
       "description": "作品世界に合わせた歌唱、コーラス、劇伴レコーディングのご相談にも対応します。",
       "image": "/images/works_03.jpg",
       "imageAlt": "レコーディング活動のイメージ写真",
-      "highlight": true
+      "highlight": false
     }
   ],
   "achievements": [

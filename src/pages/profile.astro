@@ -25,8 +25,12 @@ const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${h
               <img src={asset(member.image)} alt={member.imageAlt} loading="lazy" onerror="this.style.display='none'" />
             </figure>
             <div>
-              <p class="section-kicker">{member.voice}</p>
+              <p class="voice-label">{member.voice}</p>
               <h2>{member.name}</h2>
+              <p class="name-reading">
+                <span>{member.kana}</span>
+                <span>{member.roman}</span>
+              </p>
               <div class="prose">
                 {member.body.map((paragraph) => <p>{paragraph}</p>)}
               </div>

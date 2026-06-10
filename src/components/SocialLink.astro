@@ -1,0 +1,28 @@
+---
+const { label, href, icon } = Astro.props;
+---
+
+<a class="social-button" href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
+  {icon === "youtube" && (
+    <svg class="fill-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M21.2 7.8a3.1 3.1 0 0 0-2.2-2.2C17 5.1 12 5.1 12 5.1s-5 0-7 .5a3.1 3.1 0 0 0-2.2 2.2 32 32 0 0 0-.5 4.2 32 32 0 0 0 .5 4.2A3.1 3.1 0 0 0 5 18.4c2 .5 7 .5 7 .5s5 0 7-.5a3.1 3.1 0 0 0 2.2-2.2 32 32 0 0 0 .5-4.2 32 32 0 0 0-.5-4.2ZM10.1 15.1V8.9l5.4 3.1-5.4 3.1Z" />
+    </svg>
+  )}
+  {icon === "instagram" && (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="5" y="5" width="14" height="14" rx="4" ry="4" />
+      <circle cx="12" cy="12" r="3.2" />
+      <circle cx="16.5" cy="7.7" r="0.9" />
+    </svg>
+  )}
+  {icon === "tiktok" && (
+    <svg class="fill-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M14 4v10.2a4.1 4.1 0 1 1-3.5-4.1v2.7a1.5 1.5 0 1 0 1 1.4V4h2.5c.4 2.3 1.8 3.7 4 4v2.6a6.8 6.8 0 0 1-4-1.3Z" />
+    </svg>
+  )}
+  {icon === "x" && (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m5 5 10.7 14H19L8.3 5H5Zm.2 14 5.2-6.1M13.6 11.1 18.7 5" />
+    </svg>
+  )}
+</a>
