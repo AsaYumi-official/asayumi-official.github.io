@@ -1,25 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import faq from "../data/faq.json";
+import contact from "../data/contact.json";
 
-const inquiryTypes = [
-  {
-    title: "演奏依頼",
-    body: "コンサート、式典、学校公演、地域イベントなどの出演相談。",
-  },
-  {
-    title: "レッスン／ワークショップ",
-    body: "個人レッスン、合唱指導、発声講座、音楽鑑賞プログラム。",
-  },
-  {
-    title: "メディア／取材／広報関連",
-    body: "取材、掲載、出演依頼、プロフィール素材に関するご相談。",
-  },
-  {
-    title: "その他",
-    body: "上記に当てはまらない内容もこちらからお送りください。",
-  },
-];
+const firstCategory = contact.categories[0];
 ---
 
 <BaseLayout title="Contact | あさゆみ" description="あさゆみへの演奏依頼、レッスン、取材、その他お問い合わせ。">
@@ -30,21 +14,117 @@ const inquiryTypes = [
       <p class="section-lead">
         依頼内容、希望時期、会場、対象者、予算感、返信先を添えてご連絡ください。正式なフォームやメールアドレスは公開前に差し替えます。
       </p>
-      <div class="contact-list">
-        {inquiryTypes.map((type) => (
-          <a href="mailto:contact@example.com">
-            <strong>{type.title}</strong>
-            <span>{type.body}</span>
-          </a>
+      <div class="contact-list contact-category-list" data-contact-categories={JSON.stringify(contact.categories)}>
+        {contact.categories.map((type, index) => (
+          <button class="contact-category-card" type="button" data-category={type.id} aria-pressed={index === 0 ? "true" : "false"}>
+            <strong>{type.label}</strong>
+            <span>{type.description}</span>
+          </button>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="section band">
+  <section class="section band contact-form-section" id="contact-form">
+    <div class="section-inner narrow">
+      <p class="section-kicker">Form</p>
+      <h2 class="section-title section-title-medium" data-form-title>{firstCategory.label}</h2>
+      <p class="section-lead" data-form-intro>{firstCategory.intro}</p>
+
+      <iframe class="hidden-submit-frame" name="contact-submit-frame" title="contact-submit-frame"></iframe>
+      <form class="contact-form" action={contact.action} method="post" target="contact-submit-frame" data-contact-form data-action={contact.action}>
+        <input type="hidden" name="category" value={firstCategory.label} data-category-input />
+        <input type="hidden" name="userAgent" value="" data-user-agent />
+        <label class="honeypot">
+          <span>Website</span>
+          <input type="text" name="website" tabindex="-1" autocomplete="off" />
+        </label>
+
+        <div class="form-grid">
+          <label data-field data-groups="performance lesson other">
+            <span>お名前</span>
+            <input type="text" name="name" autocomplete="name" data-required-for="performance lesson other" />
+          </label>
+          <label data-field data-groups="performance">
+            <span>ご所属（団体名など / 任意）</span>
+            <input type="text" name="organization" autocomplete="organization" />
+          </label>
+          <label data-field data-groups="media">
+            <span>媒体名</span>
+            <input type="text" name="mediaName" />
+          </label>
+          <label data-field data-groups="media">
+            <span>ご担当者名</span>
+            <input type="text" name="personInCharge" />
+          </label>
+          <label data-field data-groups="performance lesson media other">
+            <span>メールアドレス</span>
+            <input type="email" name="email" autocomplete="email" data-required-for="performance lesson media other" />
+          </label>
+          <label data-field data-groups="performance lesson media">
+            <span>希望日時</span>
+            <input type="text" name="preferredDate" placeholder="例：2026年9月 土日午後" />
+          </label>
+          <label data-field data-groups="performance">
+            <span>会場</span>
+            <input type="text" name="venue" />
+          </label>
+          <label data-field data-groups="performance">
+            <span>ピアノの有無</span>
+            <select name="hasPiano">
+              <option value="">選択してください</option>
+              <option value="あり">あり</option>
+              <option value="なし">なし</option>
+              <option value="未定">未定</option>
+            </select>
+          </label>
+          <label data-field data-groups="performance">
+            <span>ピアノが無い場合、音源をかける設備の有無</span>
+            <select name="hasAudioEquipment">
+              <option value="">選択してください</option>
+              <option value="あり">あり</option>
+              <option value="なし">なし</option>
+              <option value="未定">未定</option>
+            </select>
+          </label>
+          <label data-field data-groups="performance lesson">
+            <span>ご予算</span>
+            <input type="text" name="budget" />
+          </label>
+          <label data-field data-groups="lesson">
+            <span>人数</span>
+            <input type="text" name="lessonPeople" />
+          </label>
+          <label data-field data-groups="lesson">
+            <span>レッスン内容</span>
+            <input type="text" name="lessonContent" />
+          </label>
+          <label data-field data-groups="lesson">
+            <span>目的（趣味・発表会・受験）</span>
+            <input type="text" name="lessonPurpose" />
+          </label>
+          <label data-field data-groups="media">
+            <span>掲載・放送予定</span>
+            <input type="text" name="publishSchedule" />
+          </label>
+          <label class="full" data-field data-groups="performance lesson media other">
+            <span data-message-label>内容詳細</span>
+            <textarea name="message" rows="7" data-required-for="performance media other"></textarea>
+          </label>
+        </div>
+
+        <p class="form-status" data-form-status aria-live="polite"></p>
+        <div class="button-row">
+          <button class="button primary" type="submit">送信する</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="section">
     <div class="section-inner">
       <p class="section-kicker">FAQ</p>
-      <h2 class="section-title">よくある質問</h2>
+      <h2 class="section-title section-title-medium">よくある質問</h2>
       <div class="grid" style="margin-top: 34px;">
         {faq.map((item) => (
           <article class="card">
@@ -55,4 +135,77 @@ const inquiryTypes = [
       </div>
     </div>
   </section>
+
+  <script>
+    type ContactCategory = {
+      id: string;
+      label: string;
+      description: string;
+      intro: string;
+    };
+
+    const list = document.querySelector<HTMLElement>("[data-contact-categories]");
+    const categories = JSON.parse(list?.dataset.contactCategories || "[]") as ContactCategory[];
+    const cards = document.querySelectorAll<HTMLButtonElement>("[data-category]");
+    const form = document.querySelector<HTMLFormElement>("[data-contact-form]");
+    const title = document.querySelector<HTMLElement>("[data-form-title]");
+    const intro = document.querySelector<HTMLElement>("[data-form-intro]");
+    const categoryInput = document.querySelector<HTMLInputElement>("[data-category-input]");
+    const userAgent = document.querySelector<HTMLInputElement>("[data-user-agent]");
+    const status = document.querySelector<HTMLElement>("[data-form-status]");
+    const messageLabel = document.querySelector<HTMLElement>("[data-message-label]");
+    const iframe = document.querySelector<HTMLIFrameElement>(".hidden-submit-frame");
+    let submitted = false;
+
+    const setCategory = (id: string) => {
+      const category = categories.find((item) => item.id === id) || categories[0];
+      if (!category) return;
+      cards.forEach((card) => card.setAttribute("aria-pressed", String(card.dataset.category === category.id)));
+      if (title) title.textContent = category.label;
+      if (intro) intro.textContent = category.intro;
+      if (categoryInput) categoryInput.value = category.label;
+      if (messageLabel) {
+        messageLabel.textContent = category.id === "lesson" ? "備考" : category.id === "other" ? "お問い合わせ内容" : category.id === "media" ? "ご依頼内容" : "内容詳細";
+      }
+
+      document.querySelectorAll<HTMLElement>("[data-field]").forEach((field) => {
+        const groups = (field.dataset.groups || "").split(" ");
+        const visible = groups.includes(category.id);
+        field.hidden = !visible;
+        field.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>("input, textarea, select").forEach((input) => {
+          const requiredFor = (input.dataset.requiredFor || "").split(" ");
+          input.required = visible && requiredFor.includes(category.id);
+        });
+      });
+    };
+
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        setCategory(card.dataset.category || "performance");
+        document.querySelector("#contact-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
+    userAgent && (userAgent.value = navigator.userAgent);
+    setCategory("performance");
+
+    form?.addEventListener("submit", (event) => {
+      if (!form.dataset.action || form.dataset.action.includes("GOOGLE_APPS_SCRIPT")) {
+        event.preventDefault();
+        if (status) status.textContent = "現在フォーム準備中です。";
+        return;
+      }
+      submitted = true;
+      if (status) status.textContent = "送信中です。";
+    });
+
+    iframe?.addEventListener("load", () => {
+      if (!submitted) return;
+      submitted = false;
+      form?.reset();
+      setCategory("performance");
+      if (userAgent) userAgent.value = navigator.userAgent;
+      if (status) status.textContent = "送信しました。内容を確認のうえ、数日以内にご返信いたします。";
+    });
+  </script>
 </BaseLayout>

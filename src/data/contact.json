@@ -1,0 +1,29 @@
+{
+  "action": "https://script.google.com/macros/s/AKfycbxcdeXWNMRud2RnQKaMfi_jNAaVEd3KIc2UjBZsk5le-494JvqvOYbn_AIwThPoG8Ufpg/exec",
+  "categories": [
+    {
+      "id": "performance",
+      "label": "演奏依頼",
+      "description": "コンサート、式典、学校公演、地域イベントなどの出演相談。",
+      "intro": "希望日時、会場、ピアノや音響設備の有無など、分かる範囲でお知らせください。"
+    },
+    {
+      "id": "lesson",
+      "label": "レッスン／ワークショップ",
+      "description": "個人レッスン、合唱指導、発声講座、音楽鑑賞プログラム。",
+      "intro": "個人レッスンの場合、基本的に男性は旭・女性はゆみが担当しますが、ご希望があればお伝えください。"
+    },
+    {
+      "id": "media",
+      "label": "メディア／取材",
+      "description": "取材、掲載、出演依頼、プロフィール素材に関するご相談。",
+      "intro": "媒体名、掲載・放送予定、締切、ご依頼内容をお知らせください。"
+    },
+    {
+      "id": "other",
+      "label": "その他",
+      "description": "上記に当てはまらない内容もこちらからお送りください。",
+      "intro": "お問い合わせ内容をできるだけ具体的にお知らせください。"
+    }
+  ]
+}
