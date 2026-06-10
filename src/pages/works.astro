@@ -1,10 +1,13 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import worksData from "../data/works.json";
+import { getWorksData } from "../lib/contentSources";
 
 const asset = (href: string) => href.startsWith("http") ? href : `${import.meta.env.BASE_URL.replace(/\/?$/, "/")}${href.replace(/^\//, "")}`;
-const categories = ["すべて", "コンサート", "学校・公共施設", "イベント・式典", "メディア出演", "レコーディング", "レッスン・ワークショップ"];
-const achievements = [...worksData.achievements].sort((a, b) => b.date.localeCompare(a.date));
+const categories = ["すべて", "コンサート", "学校・公共施設", "イベント・式典", "メディア出演", "レコーディング"];
+const worksData = await getWorksData();
+const achievements = [...worksData.achievements]
+  .filter((work) => categories.includes(work.category))
+  .sort((a, b) => b.date.localeCompare(a.date));
 ---
 
 <BaseLayout title="Works | あさゆみ" description="あさゆみの終了済み出演予定、演奏実績、活動実績の一覧。">
@@ -12,7 +15,7 @@ const achievements = [...worksData.achievements].sort((a, b) => b.date.localeCom
     <div class="section-inner">
       <p class="section-kicker">Works</p>
       <h1 class="section-title">活動実績</h1>
-      <p class="section-lead">コンサート、学校公演、式典演奏、メディア出演、レコーディング、レッスンまで、これまでの活動をまとめています。</p>
+      <p class="section-lead works-lead">コンサート、学校公演、式典演奏、メディア出演、レコーディングなど<br class="desktop-break" />これまでの活動をまとめています。</p>
 
       <div class="filter-bar" aria-label="実績カテゴリ">
         {categories.map((category, index) => (

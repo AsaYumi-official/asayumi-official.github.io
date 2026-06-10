@@ -12,7 +12,7 @@ const firstCategory = contact.categories[0];
       <p class="section-kicker">Contact</p>
       <h1 class="section-title">お問い合わせ</h1>
       <p class="section-lead">
-        依頼内容、希望時期、会場、対象者、予算感、返信先を添えてご連絡ください。正式なフォームやメールアドレスは公開前に差し替えます。
+        依頼内容、希望時期、会場、対象者、予算感、返信先を添えてご連絡ください。
       </p>
       <div class="contact-list contact-category-list" data-contact-categories={JSON.stringify(contact.categories)}>
         {contact.categories.map((type, index) => (
@@ -43,31 +43,31 @@ const firstCategory = contact.categories[0];
         <div class="form-grid">
           <label data-field data-groups="performance lesson other">
             <span>お名前</span>
-            <input type="text" name="name" autocomplete="name" data-required-for="performance lesson other" />
+            <input type="text" name="name" autocomplete="name" placeholder="例：山田 花子" data-required-for="performance lesson other" />
           </label>
           <label data-field data-groups="performance">
             <span>ご所属（団体名など / 任意）</span>
-            <input type="text" name="organization" autocomplete="organization" />
+            <input type="text" name="organization" autocomplete="organization" placeholder="例：〇〇市民ホール / 〇〇株式会社" />
           </label>
           <label data-field data-groups="media">
             <span>媒体名</span>
-            <input type="text" name="mediaName" />
+            <input type="text" name="mediaName" placeholder="例：〇〇新聞 / 〇〇番組 / Webメディア名" data-required-for="media" />
           </label>
           <label data-field data-groups="media">
             <span>ご担当者名</span>
-            <input type="text" name="personInCharge" />
+            <input type="text" name="personInCharge" placeholder="例：山田 花子" data-required-for="media" />
           </label>
           <label data-field data-groups="performance lesson media other">
             <span>メールアドレス</span>
-            <input type="email" name="email" autocomplete="email" data-required-for="performance lesson media other" />
+            <input type="email" name="email" autocomplete="email" placeholder="例：example@example.com" data-required-for="performance lesson media other" />
           </label>
           <label data-field data-groups="performance lesson media">
             <span>希望日時</span>
-            <input type="text" name="preferredDate" placeholder="例：2026年9月 土日午後" />
+            <input type="text" name="preferredDate" placeholder="例：2026年9月 土日午後" data-placeholder-performance="例：2026年9月 土日午後" data-placeholder-lesson="例：平日夕方 / 土日午前" data-placeholder-media="例：2026年6月中" />
           </label>
           <label data-field data-groups="performance">
             <span>会場</span>
-            <input type="text" name="venue" />
+            <input type="text" name="venue" placeholder="例：大阪市内のホール / 〇〇小学校体育館" />
           </label>
           <label data-field data-groups="performance">
             <span>ピアノの有無</span>
@@ -89,27 +89,27 @@ const firstCategory = contact.categories[0];
           </label>
           <label data-field data-groups="performance lesson">
             <span>ご予算</span>
-            <input type="text" name="budget" />
+            <input type="text" name="budget" placeholder="例：5万円〜10万円程度 / 未定" data-placeholder-performance="例：5万円〜10万円程度 / 未定" data-placeholder-lesson="例：1時間あたり〇〇円程度 / 未定" />
           </label>
           <label data-field data-groups="lesson">
             <span>人数</span>
-            <input type="text" name="lessonPeople" />
+            <input type="text" name="lessonPeople" placeholder="例：1名 / 合唱団20名" />
           </label>
           <label data-field data-groups="lesson">
             <span>レッスン内容</span>
-            <input type="text" name="lessonContent" />
+            <input type="text" name="lessonContent" placeholder="例：発声、歌唱指導、合唱指導" />
           </label>
           <label data-field data-groups="lesson">
             <span>目的（趣味・発表会・受験）</span>
-            <input type="text" name="lessonPurpose" />
+            <input type="text" name="lessonPurpose" placeholder="例：趣味 / 発表会 / 受験" />
           </label>
           <label data-field data-groups="media">
             <span>掲載・放送予定</span>
-            <input type="text" name="publishSchedule" />
+            <input type="text" name="publishSchedule" placeholder="例：2026年7月頃" />
           </label>
           <label class="full" data-field data-groups="performance lesson media other">
             <span data-message-label>内容詳細</span>
-            <textarea name="message" rows="7" data-required-for="performance media other"></textarea>
+            <textarea name="message" rows="7" placeholder="例：式典での演奏を20分程度お願いしたいです。対象は約100名です。" data-required-for="performance lesson media other" data-placeholder-performance="例：式典での演奏を20分程度お願いしたいです。対象は約100名です。" data-placeholder-lesson="例：女性講師希望、オンライン希望など" data-placeholder-media="例：夫婦声楽デュオとしての活動について取材希望です。" data-placeholder-other="例：ご相談内容をご記入ください。"></textarea>
           </label>
         </div>
 
@@ -175,6 +175,8 @@ const firstCategory = contact.categories[0];
         field.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>("input, textarea, select").forEach((input) => {
           const requiredFor = (input.dataset.requiredFor || "").split(" ");
           input.required = visible && requiredFor.includes(category.id);
+          const placeholder = input.dataset[`placeholder${category.id.charAt(0).toUpperCase()}${category.id.slice(1)}`];
+          if (placeholder) input.setAttribute("placeholder", placeholder);
         });
       });
     };

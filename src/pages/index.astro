@@ -3,14 +3,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 import hero from "../data/homeHero.json";
 import youtube from "../data/youtube.json";
-import worksData from "../data/works.json";
+import { getWorksData } from "../lib/contentSources";
 import { getLatestYouTubeVideo } from "../lib/youtube";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
 const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${href.replace(/^\//, "")}`;
 const latestVideo = await getLatestYouTubeVideo(youtube);
-const hasYoutubeVideo = !latestVideo.url.includes("VIDEO_ID");
+const hasYoutubeVideo = Boolean(latestVideo.embedUrl);
+const worksData = await getWorksData();
 const works = worksData.activities;
 const latestNews = (await getCollection("news", ({ data }) => data.published))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
@@ -92,14 +93,14 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
         <iframe
           class="youtube-frame"
           style="margin-top: 34px;"
-          src={latestVideo.url}
-          title="あさゆみ YouTube 最新動画"
+          src={latestVideo.embedUrl}
+          title={latestVideo.title}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowfullscreen
         ></iframe>
       ) : (
         <div class="youtube-frame placeholder" style="margin-top: 34px;">
-          <span>YouTube URL 準備中</span>
+          <span>最新動画はYouTubeチャンネルでご覧ください</span>
         </div>
       )}
       <div class="button-row centered">
