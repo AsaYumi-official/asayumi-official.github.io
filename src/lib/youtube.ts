@@ -1,7 +1,6 @@
 type YouTubeConfig = {
   title: string;
-  url: string;
-  caption: string;
+  fallbackVideoId?: string;
   channelUrl: string;
   handle?: string;
   feedUrl?: string;
@@ -11,7 +10,6 @@ type LatestVideo = {
   title: string;
   url: string;
   embedUrl: string;
-  caption: string;
   channelUrl: string;
 };
 
@@ -30,8 +28,10 @@ const textFromXml = (xml: string, tag: string) => {
   return match?.[1]?.replace(/<!\[CDATA\[|\]\]>/g, "").trim() ?? "";
 };
 
-const toEmbedUrl = (videoId: string) => `https://www.youtube.com/embed/${videoId}`;
+const videoIdPattern = /^[0-9A-Za-z_-]{11}$/;
+const toEmbedUrl = (videoId: string) => `https://www.youtube-nocookie.com/embed/${videoId}`;
 const toWatchUrl = (videoId: string) => `https://www.youtube.com/watch?v=${videoId}`;
+const validVideoId = (videoId = "") => videoIdPattern.test(videoId) ? videoId : "";
 
 const resolveFeedUrl = async (config: YouTubeConfig) => {
   const meta = import.meta as ImportMeta & { env?: Record<string, string | undefined> };
@@ -51,11 +51,11 @@ const resolveFeedUrl = async (config: YouTubeConfig) => {
 };
 
 export async function getLatestYouTubeVideo(config: YouTubeConfig): Promise<LatestVideo> {
+  const fallbackVideoId = validVideoId(config.fallbackVideoId);
   const fallback: LatestVideo = {
     title: config.title,
-    url: config.url,
-    embedUrl: config.url,
-    caption: config.caption,
+    url: fallbackVideoId ? toWatchUrl(fallbackVideoId) : config.channelUrl,
+    embedUrl: fallbackVideoId ? toEmbedUrl(fallbackVideoId) : "",
     channelUrl: config.channelUrl,
   };
 
@@ -69,7 +69,7 @@ export async function getLatestYouTubeVideo(config: YouTubeConfig): Promise<Late
     const firstEntry = xml.match(/<entry>([\s\S]*?)<\/entry>/)?.[1];
     if (!firstEntry) return fallback;
 
-    const videoId = textFromXml(firstEntry, "yt:videoId");
+    const videoId = validVideoId(textFromXml(firstEntry, "yt:videoId"));
     const title = textFromXml(firstEntry, "title");
     if (!videoId) return fallback;
 
@@ -77,7 +77,6 @@ export async function getLatestYouTubeVideo(config: YouTubeConfig): Promise<Late
       title: title || config.title,
       url: toWatchUrl(videoId),
       embedUrl: toEmbedUrl(videoId),
-      caption: title ? `最新動画: ${title}` : config.caption,
       channelUrl: config.channelUrl,
     };
   } catch {
