@@ -307,6 +307,10 @@ main {
   word-break: keep-all;
 }
 
+.text-keep {
+  white-space: nowrap;
+}
+
 .desktop-break {
   display: none;
 }
@@ -400,6 +404,7 @@ main {
 
 .prose p {
   margin: 0;
+  text-wrap: pretty;
 }
 
 .prose p + p {
@@ -439,8 +444,12 @@ main {
   margin: 22px 0 0;
   max-width: 720px;
   overflow-wrap: break-word;
-  white-space: pre-line;
   word-break: keep-all;
+}
+
+.hero-lead span {
+  display: block;
+  text-wrap: pretty;
 }
 
 .hero-portrait {
@@ -620,6 +629,7 @@ main {
 
 .works-summary p {
   margin: 0;
+  text-wrap: pretty;
 }
 
 .youtube-grid {
@@ -636,10 +646,39 @@ main {
 }
 
 .youtube-latest {
-  margin-top: 30px;
+  background: linear-gradient(180deg, rgba(248, 243, 234, 0.72), rgba(255, 255, 255, 0.58));
+  border: 1px solid rgba(141, 78, 69, 0.18);
+  border-radius: 8px;
+  margin-top: 34px;
+  padding: clamp(16px, 3vw, 24px);
+}
+
+.latest-video-label {
+  align-items: center;
+  color: var(--wine);
+  display: inline-flex;
+  font-family: system-ui, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  gap: 8px;
+  letter-spacing: 0.12em;
+  margin: 0 0 14px;
+  text-transform: uppercase;
+}
+
+.latest-video-label::before {
+  background: var(--wine);
+  border-radius: 999px;
+  content: "";
+  display: inline-block;
+  height: 8px;
+  width: 8px;
 }
 
 .youtube-card-large {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(141, 78, 69, 0.28);
+  box-shadow: 0 18px 42px rgba(65, 51, 34, 0.08);
   display: grid;
 }
 
@@ -963,16 +1002,53 @@ main {
 }
 
 .calendar-event {
+  align-items: center;
   border-radius: 999px;
   color: var(--ink);
-  display: block;
+  display: flex;
   font-family: system-ui, sans-serif;
   font-size: 0.68rem;
+  gap: 4px;
   margin-top: 4px;
   overflow: hidden;
   padding: 3px 6px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.calendar-event-icons {
+  align-items: center;
+  display: none;
+  flex: 0 0 auto;
+  gap: 2px;
+}
+
+.calendar-event-icon {
+  align-items: center;
+  display: inline-flex;
+  height: 13px;
+  justify-content: center;
+  width: 13px;
+}
+
+.calendar-event-icon svg {
+  display: block;
+  height: 13px;
+  width: 13px;
+}
+
+.calendar-event-icon svg * {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.calendar-event-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .calendar-event.performance {
@@ -1178,12 +1254,13 @@ main {
 
 @media (max-width: 759px) {
   .site-header {
+    display: flex;
     gap: 12px;
     padding-inline: 16px;
   }
 
   .brand-wordmark img {
-    max-width: 128px;
+    max-width: 118px;
   }
 
   .section {
@@ -1210,6 +1287,11 @@ main {
     word-break: normal;
   }
 
+  .hero-lead {
+    font-size: clamp(0.98rem, 4.3vw, 1.08rem);
+    max-width: 24em;
+  }
+
   .hero-lead,
   .section-lead,
   .prose,
@@ -1223,9 +1305,13 @@ main {
   }
 
   .about-title {
-    font-size: clamp(2.25rem, 13vw, 3.8rem);
+    font-size: clamp(2.05rem, 11.6vw, 3.55rem);
     overflow-wrap: anywhere;
     word-break: normal;
+  }
+
+  .about-title span:first-child {
+    max-width: 9em;
   }
 
   .about-title span,
@@ -1244,7 +1330,7 @@ main {
   }
 
   .profile-member .prose {
-    font-size: 0.96rem;
+    font-size: 0.94rem;
     line-height: 1.9;
   }
 
@@ -1270,7 +1356,43 @@ main {
   }
 
   .calendar-event {
-    white-space: normal;
+    justify-content: center;
+    min-height: 22px;
+    padding: 4px 5px;
+    white-space: nowrap;
+  }
+
+  .calendar-event.youtube,
+  .calendar-event.sns {
+    border-radius: 999px;
+    display: inline-flex;
+    width: auto;
+  }
+
+  .calendar-event.youtube .calendar-event-icons,
+  .calendar-event.sns .calendar-event-icons {
+    display: inline-flex;
+  }
+
+  .calendar-event.youtube .calendar-event-text,
+  .calendar-event.sns .calendar-event-text {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .works-summary p {
+    max-width: 20em;
+  }
+
+  .site-footer {
+    display: grid;
   }
 }
 
