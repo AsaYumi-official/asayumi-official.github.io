@@ -1,10 +1,17 @@
 {
   "title": "YouTube最新動画",
   "channelUrl": "https://www.youtube.com/@AsaYumi_ch",
+<<<<<<< ours
   "videos": [
     {
       "title": "いのちの歌",
       "subtitle": "感動系ポップス",
+=======
+  "featured": [
+    {
+      "title": "いのちの歌",
+      "subtitle": "ポップス",
+>>>>>>> theirs
       "url": "https://www.youtube.com/watch?v=mD3kspeqHQc",
       "videoId": "mD3kspeqHQc"
     },
@@ -20,5 +27,16 @@
       "url": "https://www.youtube.com/watch?v=afRxsawBOCg",
       "videoId": "afRxsawBOCg"
     }
+<<<<<<< ours
   ]
+=======
+  ],
+  "latest": {
+    "title": "大切なもの",
+    "subtitle": "近年合唱コンクール人気曲",
+    "url": "https://youtu.be/FukYEnP8fng",
+    "videoId": "FukYEnP8fng",
+    "publishedAt": "2026-06-11"
+  }
+>>>>>>> theirs
 }

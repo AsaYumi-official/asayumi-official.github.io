@@ -26,6 +26,10 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+<<<<<<< ours
+=======
+  overflow-x: hidden;
+>>>>>>> theirs
 }
 
 body,
@@ -40,13 +44,23 @@ a {
   text-decoration: none;
 }
 
+<<<<<<< ours
 img {
+=======
+img,
+iframe,
+video {
+>>>>>>> theirs
   display: block;
   max-width: 100%;
 }
 
 main {
+<<<<<<< ours
   overflow: hidden;
+=======
+  overflow-x: clip;
+>>>>>>> theirs
 }
 
 .site-header {
@@ -255,6 +269,10 @@ main {
 .section-inner {
   margin: 0 auto;
   max-width: 1120px;
+<<<<<<< ours
+=======
+  min-width: 0;
+>>>>>>> theirs
 }
 
 .section-kicker {
@@ -277,6 +295,10 @@ main {
   font-weight: 500;
   line-height: 1.08;
   margin: 0;
+<<<<<<< ours
+=======
+  overflow-wrap: break-word;
+>>>>>>> theirs
 }
 
 .section-title-medium {
@@ -289,6 +311,10 @@ main {
   line-height: 2;
   margin: 22px 0 0;
   max-width: 760px;
+<<<<<<< ours
+=======
+  min-width: 0;
+>>>>>>> theirs
   overflow-wrap: break-word;
   word-break: keep-all;
 }
@@ -336,12 +362,20 @@ main {
 .grid {
   display: grid;
   gap: 18px;
+<<<<<<< ours
+=======
+  min-width: 0;
+>>>>>>> theirs
 }
 
 .card {
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--line);
   border-radius: 8px;
+<<<<<<< ours
+=======
+  min-width: 0;
+>>>>>>> theirs
   padding: 22px;
 }
 
@@ -377,6 +411,10 @@ main {
   color: var(--muted);
   font-size: 1rem;
   line-height: 2;
+<<<<<<< ours
+=======
+  min-width: 0;
+>>>>>>> theirs
   overflow-wrap: break-word;
   word-break: keep-all;
 }
@@ -421,7 +459,13 @@ main {
   line-height: 1.9;
   margin: 22px 0 0;
   max-width: 720px;
+<<<<<<< ours
   white-space: pre-line;
+=======
+  overflow-wrap: break-word;
+  white-space: pre-line;
+  word-break: keep-all;
+>>>>>>> theirs
 }
 
 .hero-portrait {
@@ -447,6 +491,11 @@ main {
 .about-title {
   font-size: clamp(2.2rem, 6.6vw, 4.9rem);
   line-height: 1.2;
+<<<<<<< ours
+=======
+  max-width: 100%;
+  overflow-wrap: break-word;
+>>>>>>> theirs
   word-break: keep-all;
 }
 
@@ -472,6 +521,10 @@ main {
   border-radius: 8px;
   display: grid;
   gap: 18px;
+<<<<<<< ours
+=======
+  min-width: 0;
+>>>>>>> theirs
   padding: 22px;
 }
 
@@ -580,6 +633,11 @@ main {
   line-height: 2;
   margin: 28px auto 0;
   max-width: 760px;
+<<<<<<< ours
+=======
+  overflow-wrap: break-word;
+  word-break: keep-all;
+>>>>>>> theirs
 }
 
 .works-summary ul {
@@ -611,6 +669,17 @@ main {
   overflow: hidden;
 }
 
+<<<<<<< ours
+=======
+.youtube-latest {
+  margin-top: 30px;
+}
+
+.youtube-card-large {
+  display: grid;
+}
+
+>>>>>>> theirs
 .youtube-embed {
   aspect-ratio: 16 / 9;
   border: 0;
@@ -646,6 +715,15 @@ main {
   margin-top: 2px;
 }
 
+<<<<<<< ours
+=======
+.youtube-card-body time {
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-size: 0.82rem;
+}
+
+>>>>>>> theirs
 .contact-list,
 .contact-tabs {
   display: grid;
@@ -726,6 +804,10 @@ main {
 .profile-member img {
   aspect-ratio: 4 / 5;
   height: auto;
+<<<<<<< ours
+=======
+  max-height: 520px;
+>>>>>>> theirs
   object-fit: cover;
   width: 100%;
 }
@@ -773,6 +855,16 @@ main {
 
 .profile-gallery-card {
   aspect-ratio: 4 / 3;
+<<<<<<< ours
+=======
+  line-height: 0;
+}
+
+.profile-gallery-card img {
+  aspect-ratio: auto;
+  display: block;
+  height: 100%;
+>>>>>>> theirs
 }
 
 .profile-gallery-left img {
@@ -1008,7 +1100,13 @@ main {
   border: 1px solid var(--line);
   border-radius: 6px;
   color: var(--ink);
+<<<<<<< ours
   min-height: 46px;
+=======
+  max-width: 100%;
+  min-height: 46px;
+  min-width: 0;
+>>>>>>> theirs
   padding: 10px 12px;
   width: 100%;
 }
@@ -1111,6 +1209,107 @@ main {
   font-size: 0.9rem;
 }
 
+<<<<<<< ours
+=======
+@media (max-width: 759px) {
+  .site-header {
+    gap: 12px;
+    padding-inline: 16px;
+  }
+
+  .brand-wordmark img {
+    max-width: 128px;
+  }
+
+  .section {
+    padding: 58px 18px;
+  }
+
+  .hero {
+    padding: 52px 18px 64px;
+  }
+
+  .hero-inner,
+  .split,
+  .profile-member,
+  .news-card,
+  .work-result-card,
+  .youtube-card-large {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero-title {
+    font-size: clamp(3.4rem, 22vw, 5.4rem);
+    text-wrap: wrap;
+    white-space: normal;
+    word-break: normal;
+  }
+
+  .hero-lead,
+  .section-lead,
+  .prose,
+  .works-summary,
+  .card p,
+  .news-card p,
+  .work-result-card p {
+    line-height: 1.85;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .about-title {
+    font-size: clamp(2.25rem, 13vw, 3.8rem);
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .about-title span,
+  .works-title span {
+    max-width: 100%;
+  }
+
+  .news-card {
+    padding: 18px;
+  }
+
+  .profile-member figure {
+    justify-self: center;
+    max-width: min(100%, 320px);
+    width: 100%;
+  }
+
+  .profile-member .prose {
+    font-size: 0.96rem;
+    line-height: 1.9;
+  }
+
+  .profile-gallery {
+    gap: 14px;
+  }
+
+  .profile-gallery-card {
+    aspect-ratio: 4 / 3;
+  }
+
+  .works-lead {
+    max-width: 100%;
+  }
+
+  .calendar-grid {
+    min-width: 0;
+  }
+
+  .calendar-day {
+    min-height: 62px;
+    padding: 6px;
+  }
+
+  .calendar-event {
+    white-space: normal;
+  }
+}
+
+>>>>>>> theirs
 @media (min-width: 760px) {
   .hero-inner {
     grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
@@ -1144,6 +1343,14 @@ main {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+<<<<<<< ours
+=======
+  .youtube-card-large {
+    align-items: center;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  }
+
+>>>>>>> theirs
   .works-photo {
     aspect-ratio: 4 / 5;
     min-height: 0;

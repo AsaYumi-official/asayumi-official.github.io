@@ -124,6 +124,7 @@ Works ページで使うカテゴリは、現在以下に絞っています。
 
 ### YouTube 最新動画
 
+<<<<<<< ours
 `src/data/youtube.json` にHomeへ固定表示する3本の動画を置いています。
 
 各動画は `title` / `subtitle` / `url` / `videoId` を持ちます。iframe には `videoId` から生成した `https://www.youtube-nocookie.com/embed/{videoId}` だけを使います。`videoId` が空の場合のみ `url` から抽出し、取得できない場合はそのカードのiframeを出さずにYouTubeへのリンクだけを表示します。
@@ -133,6 +134,25 @@ Works ページで使うカテゴリは、現在以下に絞っています。
 ### Google Sheets 簡易CMS化の方針
 
 まだCMSは導入せず、現在はローカルJSON/Markdownを正とします。将来、GoogleスプレッドシートとApps Script JSON endpointへ移行する場合は、`src/lib/contentSources.ts` の取得先を環境変数で切り替えます。
+=======
+HomeのYouTubeは、Googleスプレッドシート「あさゆみHP」を公開するGoogle Apps Script JSON endpointから取得します。取得できない場合は `src/data/youtube.json` のfallbackを表示します。
+
+`youtube.featured` が代表動画3本、`youtube.latest` が最新動画1本です。Youtubeタブの `latest` 行を書き換えると、Homeの最新動画枠が変わります。`featured` 行は代表動画3本です。
+
+各動画は `title` / `subtitle` / `url` / `videoId` を持ちます。iframe には `videoId` から生成した `https://www.youtube-nocookie.com/embed/{videoId}` だけを使います。`videoId` が空の場合のみ `url` から抽出し、取得できない場合はそのカードのiframeを出さずにYouTubeへのリンクだけを表示します。
+
+`.github/workflows/deploy.yml` では1日1回の定期ビルドと手動実行 `workflow_dispatch` を設定しています。YouTubeはブラウザ側でもGAS endpointを取得するため、CORSが許可されていればスプレッドシート変更だけで差し替わります。取得できない場合は `src/data/youtube.json` をfallbackとして使います。
+
+### Google Sheets 簡易CMS化の方針
+
+GAS endpoint URLは `src/data/siteApi.json` で管理します。取得処理の土台は `src/lib/siteCms.ts` にまとめています。
+
+News / Works / Schedule は今後同じGAS endpointから連動予定です。現時点ではページ側の既存表示を壊さないよう、取得失敗時にローカルJSON/Markdownまたは空配列へfallbackする構造にしています。
+
+Inquiries は問い合わせ保存専用で、公開JSONには含めません。サイト側でInquiriesを読み込んだり表示したりしないでください。
+
+imageUrl には画像ファイル本体ではなく、公開済み画像のURLを入れてください。
+>>>>>>> theirs
 
 想定する環境変数:
 
@@ -175,7 +195,11 @@ Google Sheets JSON endpointを使う場合も、取得失敗時はローカルJS
 
 ## 公開前に差し替える項目
 
+<<<<<<< ours
 - `src/data/youtube.json` の `videos`
+=======
+- `src/data/youtube.json` の `featured` / `latest`
+>>>>>>> theirs
 - `src/data/contact.json` の Google Apps Script Web App URL
 - `src/data/homeHero.json` の `image`
 - `public/images/` 配下のロゴ、プロフィール、Works、News、OGP画像

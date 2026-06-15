@@ -4,12 +4,24 @@ import { getCollection } from "astro:content";
 import hero from "../data/homeHero.json";
 import youtube from "../data/youtube.json";
 import { getWorksData } from "../lib/contentSources";
+<<<<<<< ours
+=======
+import { getCmsEndpoint } from "../lib/siteCms";
+>>>>>>> theirs
 
 const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
 const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${href.replace(/^\//, "")}`;
 const worksData = await getWorksData();
 const works = worksData.activities;
+<<<<<<< ours
+=======
+const worksSummaryItems = works.flatMap((work) => (
+  work.title === "アニメ・映画など歌入り劇伴歌唱／企業ソングのレコーディング"
+    ? ["アニメ・映画など歌入り劇伴歌唱", "企業ソングのレコーディング"]
+    : [work.title]
+));
+>>>>>>> theirs
 const latestNews = (await getCollection("news", ({ data }) => data.published))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 2);
@@ -26,11 +38,25 @@ const videoIdFromUrl = (href: string) => {
     return "";
   }
 };
+<<<<<<< ours
 const youtubeVideos = youtube.videos.map((video) => {
+=======
+const cmsEndpoint = getCmsEndpoint();
+const youtubeVideos = youtube.featured.map((video) => {
+>>>>>>> theirs
   const videoId = videoIdPattern.test(video.videoId) ? video.videoId : videoIdFromUrl(video.url);
   const embedUrl = videoIdPattern.test(videoId) ? `https://www.youtube-nocookie.com/embed/${videoId}` : "";
   return { ...video, videoId, embedUrl };
 });
+<<<<<<< ours
+=======
+const latestYoutubeVideo = (() => {
+  const video = youtube.latest;
+  const videoId = videoIdPattern.test(video.videoId) ? video.videoId : videoIdFromUrl(video.url);
+  const embedUrl = videoIdPattern.test(videoId) ? `https://www.youtube-nocookie.com/embed/${videoId}` : "";
+  return { ...video, videoId, embedUrl };
+})();
+>>>>>>> theirs
 ---
 
 <BaseLayout>
@@ -57,7 +83,11 @@ const youtubeVideos = youtube.videos.map((video) => {
         <p class="section-kicker">About</p>
         <h2 class="section-title about-title">
           <span><b>旭</b><small>（あさひ）と</small> <b>ゆみ</b><small>で</small></span>
+<<<<<<< ours
           <span><small>“</small><b>あさゆみ</b><small>”です。</small></span>
+=======
+          <span><small>「</small><b>あさゆみ</b><small>」です。</small></span>
+>>>>>>> theirs
         </h2>
       </div>
       <div class="prose">
@@ -97,11 +127,19 @@ const youtubeVideos = youtube.videos.map((video) => {
     </div>
   </section>
 
+<<<<<<< ours
   <section class="section">
     <div class="section-inner">
       <p class="section-kicker">YouTube</p>
       <h2 class="section-title section-title-medium">{youtube.title}</h2>
       <div class="youtube-grid">
+=======
+  <section class="section" data-youtube-section data-cms-endpoint={cmsEndpoint} data-channel-url={youtube.channelUrl}>
+    <div class="section-inner">
+      <p class="section-kicker">YouTube</p>
+      <h2 class="section-title section-title-medium">{youtube.title}</h2>
+      <div class="youtube-grid" data-youtube-featured>
+>>>>>>> theirs
         {youtubeVideos.map((video) => (
           <article class="youtube-card">
             {video.embedUrl && (
@@ -121,12 +159,122 @@ const youtubeVideos = youtube.videos.map((video) => {
           </article>
         ))}
       </div>
+<<<<<<< ours
+=======
+      <div class="youtube-latest" data-youtube-latest>
+        <p class="section-kicker muted-kicker">最新動画</p>
+        <article class="youtube-card youtube-card-large">
+          {latestYoutubeVideo.embedUrl && (
+            <iframe
+              class="youtube-embed"
+              src={latestYoutubeVideo.embedUrl}
+              title={latestYoutubeVideo.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          )}
+          <div class="youtube-card-body">
+            {latestYoutubeVideo.subtitle && <p>{latestYoutubeVideo.subtitle}</p>}
+            <h3>{latestYoutubeVideo.title}</h3>
+            {latestYoutubeVideo.publishedAt && <time datetime={latestYoutubeVideo.publishedAt}>{latestYoutubeVideo.publishedAt}</time>}
+            <a href={latestYoutubeVideo.url} target="_blank" rel="noopener noreferrer">YouTubeで見る</a>
+          </div>
+        </article>
+      </div>
+>>>>>>> theirs
       <div class="button-row centered">
         <a class="button secondary" href={youtube.channelUrl} target="_blank" rel="noopener noreferrer">YouTubeを見る</a>
       </div>
     </div>
   </section>
 
+<<<<<<< ours
+=======
+  <script>
+    type CmsVideo = {
+      title?: string;
+      subtitle?: string;
+      url?: string;
+      videoId?: string;
+      publishedAt?: string;
+    };
+
+    type CmsYoutube = {
+      featured?: CmsVideo[];
+      latest?: CmsVideo;
+      channelUrl?: string;
+    };
+
+    const youtubeSection = document.querySelector<HTMLElement>("[data-youtube-section]");
+    const featuredRoot = document.querySelector<HTMLElement>("[data-youtube-featured]");
+    const latestRoot = document.querySelector<HTMLElement>("[data-youtube-latest]");
+    const idPattern = /^[0-9A-Za-z_-]{11}$/;
+
+    const escapeHtml = (value = "") => value
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+
+    const getVideoId = (video: CmsVideo) => {
+      if (video.videoId && idPattern.test(video.videoId)) return video.videoId;
+      if (!video.url) return "";
+      try {
+        const parsed = new URL(video.url);
+        if (parsed.hostname.includes("youtu.be")) return parsed.pathname.replace("/", "");
+        if (parsed.pathname.startsWith("/shorts/")) return parsed.pathname.split("/")[2] || "";
+        return parsed.searchParams.get("v") || "";
+      } catch {
+        return "";
+      }
+    };
+
+    const cardHtml = (video: CmsVideo, large = false) => {
+      const videoId = getVideoId(video);
+      const embed = idPattern.test(videoId) ? `https://www.youtube-nocookie.com/embed/${videoId}` : "";
+      const url = video.url || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : youtubeSection?.dataset.channelUrl || "#");
+      const subtitle = video.subtitle ? `<p>${escapeHtml(video.subtitle)}</p>` : "";
+      const publishedAt = video.publishedAt ? `<time datetime="${escapeHtml(video.publishedAt)}">${escapeHtml(video.publishedAt)}</time>` : "";
+      const iframe = embed ? `<iframe class="youtube-embed" src="${embed}" title="${escapeHtml(video.title || "YouTube")}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>` : "";
+      return `
+        <article class="youtube-card${large ? " youtube-card-large" : ""}">
+          ${iframe}
+          <div class="youtube-card-body">
+            ${subtitle}
+            <h3>${escapeHtml(video.title || "YouTube")}</h3>
+            ${publishedAt}
+            <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">YouTubeで見る</a>
+          </div>
+        </article>
+      `;
+    };
+
+    const endpointWithTarget = (endpoint: string, target: string) => `${endpoint}${endpoint.includes("?") ? "&" : "?"}target=${target}`;
+
+    const loadYoutubeFromCms = async () => {
+      const endpoint = youtubeSection?.dataset.cmsEndpoint;
+      if (!endpoint || !featuredRoot || !latestRoot) return;
+      try {
+        const response = await fetch(endpointWithTarget(endpoint, "youtube"));
+        if (!response.ok) return;
+        const data = await response.json() as CmsYoutube;
+        const featured = Array.isArray(data.featured) ? data.featured : [];
+        if (featured.length) featuredRoot.innerHTML = featured.slice(0, 3).map((video) => cardHtml(video)).join("");
+        if (data.latest) {
+          latestRoot.innerHTML = `
+            <p class="section-kicker muted-kicker">最新動画</p>
+            ${cardHtml(data.latest, true)}
+          `;
+        }
+      } catch (error) {
+        console.warn("YouTube CMS fetch failed", error);
+      }
+    };
+
+    loadYoutubeFromCms();
+  </script>
+
+>>>>>>> theirs
   <section class="section band">
     <div class="section-inner">
       <p class="section-kicker">WORKS</p>
@@ -145,7 +293,11 @@ const youtubeVideos = youtube.videos.map((video) => {
       </div>
       <div class="works-summary">
         <ul>
+<<<<<<< ours
           {works.map((work) => <li>{work.title}</li>)}
+=======
+          {worksSummaryItems.map((title) => <li>{title}</li>)}
+>>>>>>> theirs
         </ul>
         <p>
           上記に該当しないお仕事でもお気軽にご相談ください
