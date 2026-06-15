@@ -4,24 +4,18 @@ import { getCollection } from "astro:content";
 import hero from "../data/homeHero.json";
 import youtube from "../data/youtube.json";
 import { getWorksData } from "../lib/contentSources";
-<<<<<<< ours
-=======
 import { getCmsEndpoint } from "../lib/siteCms";
->>>>>>> theirs
 
 const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
 const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${href.replace(/^\//, "")}`;
 const worksData = await getWorksData();
 const works = worksData.activities;
-<<<<<<< ours
-=======
 const worksSummaryItems = works.flatMap((work) => (
   work.title === "アニメ・映画など歌入り劇伴歌唱／企業ソングのレコーディング"
     ? ["アニメ・映画など歌入り劇伴歌唱", "企業ソングのレコーディング"]
     : [work.title]
 ));
->>>>>>> theirs
 const latestNews = (await getCollection("news", ({ data }) => data.published))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 2);
@@ -38,25 +32,18 @@ const videoIdFromUrl = (href: string) => {
     return "";
   }
 };
-<<<<<<< ours
-const youtubeVideos = youtube.videos.map((video) => {
-=======
 const cmsEndpoint = getCmsEndpoint();
 const youtubeVideos = youtube.featured.map((video) => {
->>>>>>> theirs
   const videoId = videoIdPattern.test(video.videoId) ? video.videoId : videoIdFromUrl(video.url);
   const embedUrl = videoIdPattern.test(videoId) ? `https://www.youtube-nocookie.com/embed/${videoId}` : "";
   return { ...video, videoId, embedUrl };
 });
-<<<<<<< ours
-=======
 const latestYoutubeVideo = (() => {
   const video = youtube.latest;
   const videoId = videoIdPattern.test(video.videoId) ? video.videoId : videoIdFromUrl(video.url);
   const embedUrl = videoIdPattern.test(videoId) ? `https://www.youtube-nocookie.com/embed/${videoId}` : "";
   return { ...video, videoId, embedUrl };
 })();
->>>>>>> theirs
 ---
 
 <BaseLayout>
@@ -83,11 +70,7 @@ const latestYoutubeVideo = (() => {
         <p class="section-kicker">About</p>
         <h2 class="section-title about-title">
           <span><b>旭</b><small>（あさひ）と</small> <b>ゆみ</b><small>で</small></span>
-<<<<<<< ours
-          <span><small>“</small><b>あさゆみ</b><small>”です。</small></span>
-=======
           <span><small>「</small><b>あさゆみ</b><small>」です。</small></span>
->>>>>>> theirs
         </h2>
       </div>
       <div class="prose">
@@ -127,19 +110,11 @@ const latestYoutubeVideo = (() => {
     </div>
   </section>
 
-<<<<<<< ours
-  <section class="section">
-    <div class="section-inner">
-      <p class="section-kicker">YouTube</p>
-      <h2 class="section-title section-title-medium">{youtube.title}</h2>
-      <div class="youtube-grid">
-=======
   <section class="section" data-youtube-section data-cms-endpoint={cmsEndpoint} data-channel-url={youtube.channelUrl}>
     <div class="section-inner">
       <p class="section-kicker">YouTube</p>
       <h2 class="section-title section-title-medium">{youtube.title}</h2>
       <div class="youtube-grid" data-youtube-featured>
->>>>>>> theirs
         {youtubeVideos.map((video) => (
           <article class="youtube-card">
             {video.embedUrl && (
@@ -159,8 +134,6 @@ const latestYoutubeVideo = (() => {
           </article>
         ))}
       </div>
-<<<<<<< ours
-=======
       <div class="youtube-latest" data-youtube-latest>
         <p class="section-kicker muted-kicker">最新動画</p>
         <article class="youtube-card youtube-card-large">
@@ -181,15 +154,12 @@ const latestYoutubeVideo = (() => {
           </div>
         </article>
       </div>
->>>>>>> theirs
       <div class="button-row centered">
         <a class="button secondary" href={youtube.channelUrl} target="_blank" rel="noopener noreferrer">YouTubeを見る</a>
       </div>
     </div>
   </section>
 
-<<<<<<< ours
-=======
   <script>
     type CmsVideo = {
       title?: string;
@@ -274,7 +244,6 @@ const latestYoutubeVideo = (() => {
     loadYoutubeFromCms();
   </script>
 
->>>>>>> theirs
   <section class="section band">
     <div class="section-inner">
       <p class="section-kicker">WORKS</p>
@@ -293,11 +262,7 @@ const latestYoutubeVideo = (() => {
       </div>
       <div class="works-summary">
         <ul>
-<<<<<<< ours
-          {works.map((work) => <li>{work.title}</li>)}
-=======
           {worksSummaryItems.map((title) => <li>{title}</li>)}
->>>>>>> theirs
         </ul>
         <p>
           上記に該当しないお仕事でもお気軽にご相談ください
