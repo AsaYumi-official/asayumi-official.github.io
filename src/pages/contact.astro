@@ -2,10 +2,6 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import faq from "../data/faq.json";
 import contact from "../data/contact.json";
-<<<<<<< ours
-
-const firstCategory = contact.categories[0];
-=======
 import siteApi from "../data/siteApi.json";
 
 const firstCategory = contact.categories[0];
@@ -65,7 +61,6 @@ const contactForms = {
     ],
   },
 };
->>>>>>> theirs
 ---
 
 <BaseLayout title="Contact | あさゆみ" description="あさゆみへの歌唱依頼、レッスン、取材、その他お問い合わせ。">
@@ -73,14 +68,7 @@ const contactForms = {
     <div class="section-inner">
       <p class="section-kicker">Contact</p>
       <h1 class="section-title">お問い合わせ</h1>
-<<<<<<< ours
-      <p class="section-lead">
-        依頼内容、希望時期、会場、対象者、予算感、返信先を添えてご連絡ください。
-      </p>
-      <div class="contact-tabs" data-contact-categories={JSON.stringify(contact.categories)} role="tablist" aria-label="問い合わせ種別">
-=======
       <div class="contact-tabs" data-contact-categories={JSON.stringify(contact.categories)} data-contact-forms={JSON.stringify(contactForms)} role="tablist" aria-label="問い合わせ種別">
->>>>>>> theirs
         {contact.categories.map((type, index) => (
           <button class="contact-tab" type="button" data-category={type.id} aria-pressed={index === 0 ? "true" : "false"} role="tab">
             <strong>{type.label}</strong>
@@ -98,14 +86,9 @@ const contactForms = {
       <p class="section-lead" data-form-intro>{firstCategory.intro}</p>
 
       <iframe class="hidden-submit-frame" name="contact-submit-frame" title="contact-submit-frame"></iframe>
-<<<<<<< ours
-      <form class="contact-form" action={contact.action} method="post" target="contact-submit-frame" data-contact-form data-action={contact.action}>
-        <input type="hidden" name="category" value={firstCategory.label} data-category-input />
-=======
       <form class="contact-form" action={formAction} method="post" target="contact-submit-frame" data-contact-form data-action={formAction}>
         <input type="hidden" name="category" value={firstCategory.label} data-category-input />
         <input type="hidden" name="inquiryType" value={firstCategory.id} data-inquiry-type-input />
->>>>>>> theirs
         <input type="hidden" name="personInCharge" value="" />
         <input type="hidden" name="userAgent" value="" data-user-agent />
         <label class="honeypot">
@@ -113,85 +96,7 @@ const contactForms = {
           <input type="text" name="website" tabindex="-1" autocomplete="off" />
         </label>
 
-<<<<<<< ours
-        <div class="form-grid">
-          <label data-field data-groups="performance lesson media other">
-            <span>お名前</span>
-            <input type="text" name="name" autocomplete="name" placeholder="例：山田 花子" data-required-for="performance lesson media other" />
-          </label>
-          <label data-field data-groups="performance lesson media other">
-            <span>ご所属</span>
-            <input type="text" name="organization" autocomplete="organization" placeholder="例：○○市民ホール / ○○株式会社" data-placeholder-performance="例：○○市民ホール / ○○株式会社" data-placeholder-lesson="例：○○合唱団 / 個人" data-placeholder-media="例：○○編集部 / ○○制作会社" data-placeholder-other="例：任意" />
-          </label>
-          <label data-field data-groups="media">
-            <span>媒体名</span>
-            <input type="text" name="mediaName" placeholder="例：○○新聞 / ○○番組 / Webメディア名" />
-          </label>
-          <label data-field data-groups="performance lesson media other">
-            <span>メールアドレス</span>
-            <input type="email" name="email" autocomplete="email" placeholder="例：example@example.com" data-required-for="performance lesson media other" />
-          </label>
-          <label data-field data-groups="performance lesson">
-            <span>希望日時</span>
-            <input type="text" name="preferredDate" placeholder="例：2026年9月 土日午後 / 未定" data-placeholder-performance="例：2026年9月 土日午後 / 未定" data-placeholder-lesson="例：平日夕方 / 土日午前" />
-          </label>
-          <label data-field data-groups="performance">
-            <span>会場</span>
-            <input type="text" name="venue" placeholder="例：大阪市内のホール / ○○小学校体育館 / 未定" />
-          </label>
-          <label data-field data-groups="performance">
-            <span>ピアノの有無</span>
-            <select name="hasPiano">
-              <option value="">選択してください</option>
-              <option value="あり">あり</option>
-              <option value="なし">なし</option>
-              <option value="未定">未定</option>
-            </select>
-          </label>
-          <label data-field data-groups="performance">
-            <span>ピアノがない場合、音源を流す設備の有無</span>
-            <select name="hasAudioEquipment">
-              <option value="">選択してください</option>
-              <option value="あり">あり</option>
-              <option value="なし">なし</option>
-              <option value="未定">未定</option>
-            </select>
-          </label>
-          <label data-field data-groups="performance">
-            <span>ご予算</span>
-            <input type="text" name="budget" placeholder="例：5万円〜10万円程度 / 未定" />
-          </label>
-          <div class="full checkbox-field" data-field data-groups="performance">
-            <p>ピアノ生演奏の場合あさゆみと伴奏者を含め、必ず3人以上での演奏となりますことご了承ください。</p>
-            <label class="checkbox-inline">
-              <input type="checkbox" name="acknowledgeAccompanist" value="確認しました" data-required-for="performance" />
-              <span>確認しました</span>
-            </label>
-          </div>
-          <label data-field data-groups="lesson">
-            <span>人数</span>
-            <input type="text" name="lessonPeople" placeholder="例：1名 / 合唱団20名" />
-          </label>
-          <label data-field data-groups="lesson">
-            <span>レッスン内容</span>
-            <input type="text" name="lessonContent" placeholder="例：発声、歌曲指導、合唱指導" />
-          </label>
-          <label data-field data-groups="lesson">
-            <span>目的</span>
-            <input type="text" name="lessonPurpose" placeholder="例：趣味 / 発表会 / 受験" />
-          </label>
-          <label data-field data-groups="media">
-            <span>掲載・放送予定日時</span>
-            <input type="text" name="publishSchedule" placeholder="例：2026年7月頃 / 未定" />
-          </label>
-          <label class="full" data-field data-groups="performance lesson media other">
-            <span data-message-label>内容詳細</span>
-            <textarea name="message" rows="7" placeholder="例：式典での歌唱を20分ほどお願いしたいです。対象は約100名です。" data-required-for="performance media other" data-placeholder-performance="例：式典での歌唱を20分ほどお願いしたいです。対象は約100名です。" data-placeholder-lesson="例：発表会に向けて発声と歌唱を見てほしいです。" data-placeholder-media="例：夫婦声楽デュオとしての活動について取材希望です。" data-placeholder-other="例：ご相談内容をご記入ください。"></textarea>
-          </label>
-        </div>
-=======
         <div class="form-grid" data-form-fields></div>
->>>>>>> theirs
 
         <p class="form-status" data-form-status aria-live="polite"></p>
         <div class="button-row">
@@ -217,8 +122,6 @@ const contactForms = {
   </section>
 
   <script>
-<<<<<<< ours
-=======
     type ContactField = {
       type: "text" | "email" | "select" | "textarea" | "checkbox";
       name: string;
@@ -237,7 +140,6 @@ const contactForms = {
       fields: ContactField[];
     };
 
->>>>>>> theirs
     type ContactCategory = {
       id: string;
       label: string;
@@ -247,26 +149,12 @@ const contactForms = {
 
     const list = document.querySelector<HTMLElement>("[data-contact-categories]");
     const categories = JSON.parse(list?.dataset.contactCategories || "[]") as ContactCategory[];
-<<<<<<< ours
-=======
     const contactForms = JSON.parse(list?.dataset.contactForms || "{}") as Record<string, ContactFormConfig>;
->>>>>>> theirs
     const cards = document.querySelectorAll<HTMLButtonElement>("[data-category]");
     const form = document.querySelector<HTMLFormElement>("[data-contact-form]");
     const title = document.querySelector<HTMLElement>("[data-form-title]");
     const intro = document.querySelector<HTMLElement>("[data-form-intro]");
     const categoryInput = document.querySelector<HTMLInputElement>("[data-category-input]");
-<<<<<<< ours
-    const userAgent = document.querySelector<HTMLInputElement>("[data-user-agent]");
-    const status = document.querySelector<HTMLElement>("[data-form-status]");
-    const messageLabel = document.querySelector<HTMLElement>("[data-message-label]");
-    const iframe = document.querySelector<HTMLIFrameElement>(".hidden-submit-frame");
-    let submitted = false;
-
-    const setCategory = (id: string) => {
-      const category = categories.find((item) => item.id === id) || categories[0];
-      if (!category) return;
-=======
     const inquiryTypeInput = document.querySelector<HTMLInputElement>("[data-inquiry-type-input]");
     const userAgent = document.querySelector<HTMLInputElement>("[data-user-agent]");
     const status = document.querySelector<HTMLElement>("[data-form-status]");
@@ -338,45 +226,16 @@ const contactForms = {
       const category = categories.find((item) => item.id === id) || categories[0];
       const formConfig = contactForms[id] || contactForms[category?.id] || contactForms.performance;
       if (!category || !formConfig || !fieldRoot) return;
->>>>>>> theirs
       cards.forEach((card) => {
         const active = card.dataset.category === category.id;
         card.setAttribute("aria-pressed", String(active));
         card.setAttribute("aria-selected", String(active));
       });
-<<<<<<< ours
-      if (title) title.textContent = category.label;
-      if (intro) intro.textContent = category.intro;
-      if (categoryInput) categoryInput.value = category.label;
-      if (messageLabel) {
-        messageLabel.textContent = category.id === "lesson" ? "備考" : category.id === "other" ? "お問い合わせ内容" : category.id === "media" ? "ご依頼内容" : "内容詳細";
-      }
-
-      document.querySelectorAll<HTMLElement>("[data-field]").forEach((field) => {
-        const groups = (field.dataset.groups || "").split(" ");
-        const visible = groups.includes(category.id);
-        field.hidden = !visible;
-        field.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>("input, textarea, select").forEach((input) => {
-          if (!visible) {
-            if (input instanceof HTMLInputElement && (input.type === "checkbox" || input.type === "radio")) {
-              input.checked = false;
-            } else {
-              input.value = "";
-            }
-          }
-          const requiredFor = (input.dataset.requiredFor || "").split(" ");
-          input.required = visible && requiredFor.includes(category.id);
-          const placeholder = input.dataset[`placeholder${category.id.charAt(0).toUpperCase()}${category.id.slice(1)}`];
-          if (placeholder) input.setAttribute("placeholder", placeholder);
-        });
-      });
-=======
       if (title) title.textContent = formConfig.label;
       if (intro) intro.textContent = formConfig.intro;
       if (categoryInput) categoryInput.value = formConfig.label;
       if (inquiryTypeInput) inquiryTypeInput.value = category.id;
       fieldRoot.innerHTML = formConfig.fields.map(renderField).join("");
->>>>>>> theirs
     };
 
     cards.forEach((card) => {
