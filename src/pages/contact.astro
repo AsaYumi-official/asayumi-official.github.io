@@ -2,8 +2,70 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import faq from "../data/faq.json";
 import contact from "../data/contact.json";
+<<<<<<< ours
 
 const firstCategory = contact.categories[0];
+=======
+import siteApi from "../data/siteApi.json";
+
+const firstCategory = contact.categories[0];
+const formAction = siteApi.endpoint || contact.action;
+
+const contactForms = {
+  performance: {
+    label: "歌唱依頼",
+    intro: "希望日時、会場、ピアノや音響設備の有無など、分かる範囲でお知らせください。\nわからない箇所は「未定」などご記入ください。",
+    fields: [
+      { type: "text", name: "name", label: "お名前", required: true, autocomplete: "name", placeholder: "例：山田 花子" },
+      { type: "text", name: "organization", label: "ご所属", autocomplete: "organization", placeholder: "例：○○市民ホール / ○○株式会社" },
+      { type: "email", name: "email", label: "メールアドレス", required: true, autocomplete: "email", placeholder: "例：example@example.com" },
+      { type: "text", name: "preferredDate", label: "希望日時", placeholder: "例：2026年9月 土日午後 / 未定" },
+      { type: "text", name: "venue", label: "会場", placeholder: "例：大阪市内のホール / ○○小学校体育館 / 未定" },
+      { type: "select", name: "hasPiano", label: "ピアノの有無", options: ["あり", "なし", "未定"] },
+      { type: "select", name: "hasAudioEquipment", label: "ピアノがない場合、音源を流す設備の有無", options: ["あり", "なし", "未定"] },
+      { type: "text", name: "budget", label: "ご予算", placeholder: "例：5万円〜10万円程度 / 未定" },
+      { type: "textarea", name: "message", label: "内容詳細", required: true, placeholder: "例：式典での歌唱を20分ほどお願いしたいです。対象は約100名です。" },
+      { type: "checkbox", name: "acknowledgeAccompanist", label: "ピアノ生演奏の場合、あさゆみと伴奏者を含め、必ず3人以上での演奏となりますことご了承ください。", required: true, value: "確認しました", checkboxLabel: "確認しました" },
+    ],
+  },
+  lesson: {
+    label: "レッスン／ワークショップ",
+    intro: "個人レッスンの場合、基本的に男性は旭・女性はゆみが担当しますが、ご希望があればお伝えください。",
+    fields: [
+      { type: "text", name: "name", label: "お名前", required: true, autocomplete: "name", placeholder: "例：山田 花子" },
+      { type: "text", name: "organization", label: "ご所属", autocomplete: "organization", placeholder: "例：○○合唱団 / 個人" },
+      { type: "email", name: "email", label: "メールアドレス", required: true, autocomplete: "email", placeholder: "例：example@example.com" },
+      { type: "text", name: "preferredDate", label: "希望日時", placeholder: "例：平日夕方 / 土日午前" },
+      { type: "text", name: "lessonPeople", label: "人数", placeholder: "例：1名 / 合唱団20名" },
+      { type: "text", name: "lessonContent", label: "レッスン内容", placeholder: "例：発声、歌曲指導、合唱指導" },
+      { type: "text", name: "lessonPurpose", label: "目的", placeholder: "例：趣味 / 発表会 / 受験" },
+      { type: "textarea", name: "message", label: "内容詳細", placeholder: "例：発表会に向けて発声と歌唱を見てほしいです。" },
+    ],
+  },
+  media: {
+    label: "メディア／取材",
+    intro: "媒体名、掲載・放送予定、締切、ご依頼内容をお知らせください。",
+    fields: [
+      { type: "text", name: "name", label: "お名前", required: true, autocomplete: "name", placeholder: "例：山田 花子" },
+      { type: "text", name: "organization", label: "ご所属", autocomplete: "organization", placeholder: "例：○○編集部 / ○○制作会社" },
+      { type: "text", name: "mediaName", label: "媒体名", placeholder: "例：○○新聞 / ○○番組 / Webメディア名" },
+      { type: "email", name: "email", label: "メールアドレス", required: true, autocomplete: "email", placeholder: "例：example@example.com" },
+      { type: "text", name: "publishSchedule", label: "掲載・放送予定日時", placeholder: "例：2026年7月頃 / 未定" },
+      { type: "textarea", name: "message", label: "内容詳細", required: true, placeholder: "例：夫婦声楽デュオとしての活動について取材希望です。" },
+    ],
+  },
+  other: {
+    label: "その他",
+    intro: "お問い合わせ内容をできるだけ具体的にお知らせください。",
+    fields: [
+      { type: "text", name: "name", label: "お名前", required: true, autocomplete: "name", placeholder: "例：山田 花子" },
+      { type: "text", name: "organization", label: "ご所属", autocomplete: "organization", placeholder: "例：任意" },
+      { type: "email", name: "email", label: "メールアドレス", required: true, autocomplete: "email", placeholder: "例：example@example.com" },
+      { type: "textarea", name: "message", label: "内容詳細", required: true, placeholder: "例：ご相談内容をご記入ください。" },
+    ],
+  },
+};
+>>>>>>> theirs
 ---
 
 <BaseLayout title="Contact | あさゆみ" description="あさゆみへの歌唱依頼、レッスン、取材、その他お問い合わせ。">
@@ -11,10 +73,14 @@ const firstCategory = contact.categories[0];
     <div class="section-inner">
       <p class="section-kicker">Contact</p>
       <h1 class="section-title">お問い合わせ</h1>
+<<<<<<< ours
       <p class="section-lead">
         依頼内容、希望時期、会場、対象者、予算感、返信先を添えてご連絡ください。
       </p>
       <div class="contact-tabs" data-contact-categories={JSON.stringify(contact.categories)} role="tablist" aria-label="問い合わせ種別">
+=======
+      <div class="contact-tabs" data-contact-categories={JSON.stringify(contact.categories)} data-contact-forms={JSON.stringify(contactForms)} role="tablist" aria-label="問い合わせ種別">
+>>>>>>> theirs
         {contact.categories.map((type, index) => (
           <button class="contact-tab" type="button" data-category={type.id} aria-pressed={index === 0 ? "true" : "false"} role="tab">
             <strong>{type.label}</strong>
@@ -32,8 +98,14 @@ const firstCategory = contact.categories[0];
       <p class="section-lead" data-form-intro>{firstCategory.intro}</p>
 
       <iframe class="hidden-submit-frame" name="contact-submit-frame" title="contact-submit-frame"></iframe>
+<<<<<<< ours
       <form class="contact-form" action={contact.action} method="post" target="contact-submit-frame" data-contact-form data-action={contact.action}>
         <input type="hidden" name="category" value={firstCategory.label} data-category-input />
+=======
+      <form class="contact-form" action={formAction} method="post" target="contact-submit-frame" data-contact-form data-action={formAction}>
+        <input type="hidden" name="category" value={firstCategory.label} data-category-input />
+        <input type="hidden" name="inquiryType" value={firstCategory.id} data-inquiry-type-input />
+>>>>>>> theirs
         <input type="hidden" name="personInCharge" value="" />
         <input type="hidden" name="userAgent" value="" data-user-agent />
         <label class="honeypot">
@@ -41,6 +113,7 @@ const firstCategory = contact.categories[0];
           <input type="text" name="website" tabindex="-1" autocomplete="off" />
         </label>
 
+<<<<<<< ours
         <div class="form-grid">
           <label data-field data-groups="performance lesson media other">
             <span>お名前</span>
@@ -116,6 +189,9 @@ const firstCategory = contact.categories[0];
             <textarea name="message" rows="7" placeholder="例：式典での歌唱を20分ほどお願いしたいです。対象は約100名です。" data-required-for="performance media other" data-placeholder-performance="例：式典での歌唱を20分ほどお願いしたいです。対象は約100名です。" data-placeholder-lesson="例：発表会に向けて発声と歌唱を見てほしいです。" data-placeholder-media="例：夫婦声楽デュオとしての活動について取材希望です。" data-placeholder-other="例：ご相談内容をご記入ください。"></textarea>
           </label>
         </div>
+=======
+        <div class="form-grid" data-form-fields></div>
+>>>>>>> theirs
 
         <p class="form-status" data-form-status aria-live="polite"></p>
         <div class="button-row">
@@ -141,6 +217,27 @@ const firstCategory = contact.categories[0];
   </section>
 
   <script>
+<<<<<<< ours
+=======
+    type ContactField = {
+      type: "text" | "email" | "select" | "textarea" | "checkbox";
+      name: string;
+      label: string;
+      required?: boolean;
+      autocomplete?: string;
+      placeholder?: string;
+      options?: string[];
+      value?: string;
+      checkboxLabel?: string;
+    };
+
+    type ContactFormConfig = {
+      label: string;
+      intro: string;
+      fields: ContactField[];
+    };
+
+>>>>>>> theirs
     type ContactCategory = {
       id: string;
       label: string;
@@ -150,11 +247,16 @@ const firstCategory = contact.categories[0];
 
     const list = document.querySelector<HTMLElement>("[data-contact-categories]");
     const categories = JSON.parse(list?.dataset.contactCategories || "[]") as ContactCategory[];
+<<<<<<< ours
+=======
+    const contactForms = JSON.parse(list?.dataset.contactForms || "{}") as Record<string, ContactFormConfig>;
+>>>>>>> theirs
     const cards = document.querySelectorAll<HTMLButtonElement>("[data-category]");
     const form = document.querySelector<HTMLFormElement>("[data-contact-form]");
     const title = document.querySelector<HTMLElement>("[data-form-title]");
     const intro = document.querySelector<HTMLElement>("[data-form-intro]");
     const categoryInput = document.querySelector<HTMLInputElement>("[data-category-input]");
+<<<<<<< ours
     const userAgent = document.querySelector<HTMLInputElement>("[data-user-agent]");
     const status = document.querySelector<HTMLElement>("[data-form-status]");
     const messageLabel = document.querySelector<HTMLElement>("[data-message-label]");
@@ -164,11 +266,85 @@ const firstCategory = contact.categories[0];
     const setCategory = (id: string) => {
       const category = categories.find((item) => item.id === id) || categories[0];
       if (!category) return;
+=======
+    const inquiryTypeInput = document.querySelector<HTMLInputElement>("[data-inquiry-type-input]");
+    const userAgent = document.querySelector<HTMLInputElement>("[data-user-agent]");
+    const status = document.querySelector<HTMLElement>("[data-form-status]");
+    const fieldRoot = document.querySelector<HTMLElement>("[data-form-fields]");
+    const iframe = document.querySelector<HTMLIFrameElement>(".hidden-submit-frame");
+    let submitted = false;
+
+    const escapeHtml = (value = "") => value
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+
+    const inputAttributes = (field: ContactField) => {
+      const attributes = [
+        `name="${escapeHtml(field.name)}"`,
+        `type="${field.type === "email" ? "email" : "text"}"`,
+      ];
+      if (field.required) attributes.push("required");
+      if (field.autocomplete) attributes.push(`autocomplete="${escapeHtml(field.autocomplete)}"`);
+      if (field.placeholder) attributes.push(`placeholder="${escapeHtml(field.placeholder)}"`);
+      return attributes.join(" ");
+    };
+
+    const renderField = (field: ContactField) => {
+      if (field.type === "textarea") {
+        return `
+          <label class="full">
+            <span>${escapeHtml(field.label)}</span>
+            <textarea name="${escapeHtml(field.name)}" rows="7"${field.required ? " required" : ""}${field.placeholder ? ` placeholder="${escapeHtml(field.placeholder)}"` : ""}></textarea>
+          </label>
+        `;
+      }
+
+      if (field.type === "select") {
+        const options = (field.options || []).map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`).join("");
+        return `
+          <label>
+            <span>${escapeHtml(field.label)}</span>
+            <select name="${escapeHtml(field.name)}"${field.required ? " required" : ""}>
+              <option value="">選択してください</option>
+              ${options}
+            </select>
+          </label>
+        `;
+      }
+
+      if (field.type === "checkbox") {
+        return `
+          <div class="full checkbox-field">
+            <p>${escapeHtml(field.label)}</p>
+            <label class="checkbox-inline">
+              <input type="checkbox" name="${escapeHtml(field.name)}" value="${escapeHtml(field.value || "確認しました")}"${field.required ? " required" : ""} />
+              <span>${escapeHtml(field.checkboxLabel || field.value || "確認しました")}</span>
+            </label>
+          </div>
+        `;
+      }
+
+      return `
+        <label>
+          <span>${escapeHtml(field.label)}</span>
+          <input ${inputAttributes(field)} />
+        </label>
+      `;
+    };
+
+    const setCategory = (id: string) => {
+      const category = categories.find((item) => item.id === id) || categories[0];
+      const formConfig = contactForms[id] || contactForms[category?.id] || contactForms.performance;
+      if (!category || !formConfig || !fieldRoot) return;
+>>>>>>> theirs
       cards.forEach((card) => {
         const active = card.dataset.category === category.id;
         card.setAttribute("aria-pressed", String(active));
         card.setAttribute("aria-selected", String(active));
       });
+<<<<<<< ours
       if (title) title.textContent = category.label;
       if (intro) intro.textContent = category.intro;
       if (categoryInput) categoryInput.value = category.label;
@@ -194,6 +370,13 @@ const firstCategory = contact.categories[0];
           if (placeholder) input.setAttribute("placeholder", placeholder);
         });
       });
+=======
+      if (title) title.textContent = formConfig.label;
+      if (intro) intro.textContent = formConfig.intro;
+      if (categoryInput) categoryInput.value = formConfig.label;
+      if (inquiryTypeInput) inquiryTypeInput.value = category.id;
+      fieldRoot.innerHTML = formConfig.fields.map(renderField).join("");
+>>>>>>> theirs
     };
 
     cards.forEach((card) => {
