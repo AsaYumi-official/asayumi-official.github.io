@@ -33,6 +33,7 @@ const videoIdFromUrl = (href: string) => {
   }
 };
 const cmsEndpoint = getCmsEndpoint();
+const heroLeadLines = hero.lead.split("\n");
 const youtubeVideos = youtube.featured.map((video) => {
   const videoId = videoIdPattern.test(video.videoId) ? video.videoId : videoIdFromUrl(video.url);
   const embedUrl = videoIdPattern.test(videoId) ? `https://www.youtube-nocookie.com/embed/${videoId}` : "";
@@ -52,7 +53,9 @@ const latestYoutubeVideo = (() => {
       <div class="hero-content">
         <p class="section-kicker">{hero.label}</p>
         <h1 class="hero-title">{hero.title}</h1>
-        <p class="hero-lead">{hero.lead}</p>
+        <p class="hero-lead">
+          {heroLeadLines.map((line) => <span>{line}</span>)}
+        </p>
         <div class="button-row">
           <a class="button primary" href={url(hero.primaryCta.href)}>{hero.primaryCta.label}</a>
           <a class="button secondary" href={url(hero.secondaryCta.href)}>{hero.secondaryCta.label}</a>
@@ -69,7 +72,7 @@ const latestYoutubeVideo = (() => {
       <div>
         <p class="section-kicker">About</p>
         <h2 class="section-title about-title">
-          <span><b>旭</b><small>（あさひ）と</small> <b>ゆみ</b><small>で</small></span>
+          <span><b>旭</b><small>（あさひ）と</small> <span class="text-keep"><b>ゆみ</b><small>で</small></span></span>
           <span><small>「</small><b>あさゆみ</b><small>」です。</small></span>
         </h2>
       </div>
@@ -77,7 +80,7 @@ const latestYoutubeVideo = (() => {
         <p>
           あさゆみは、東京藝術大学で学んだ声楽家夫婦によるソプラノとバリトンのデュオです。
           クラシックからポップスまで、幅広い歌を届けています。
-          演奏会をはじめ、式典やパーティー、学校、各種施設での公演など、全国どこへでも歌いに参ります。
+          演奏会をはじめ、式典やパーティー、学校、各種施設での公演など、全国どこへでも歌いに<span class="text-keep">参ります。</span>
         </p>
         <div class="button-row">
           <a class="button secondary" href={url("/profile/")}>Profile</a>
@@ -135,7 +138,7 @@ const latestYoutubeVideo = (() => {
         ))}
       </div>
       <div class="youtube-latest" data-youtube-latest>
-        <p class="section-kicker muted-kicker">最新動画</p>
+        <p class="latest-video-label">最新動画</p>
         <article class="youtube-card youtube-card-large">
           {latestYoutubeVideo.embedUrl && (
             <iframe
@@ -146,10 +149,9 @@ const latestYoutubeVideo = (() => {
               allowfullscreen
             ></iframe>
           )}
-          <div class="youtube-card-body">
+            <div class="youtube-card-body">
             {latestYoutubeVideo.subtitle && <p>{latestYoutubeVideo.subtitle}</p>}
             <h3>{latestYoutubeVideo.title}</h3>
-            {latestYoutubeVideo.publishedAt && <time datetime={latestYoutubeVideo.publishedAt}>{latestYoutubeVideo.publishedAt}</time>}
             <a href={latestYoutubeVideo.url} target="_blank" rel="noopener noreferrer">YouTubeで見る</a>
           </div>
         </article>
@@ -204,7 +206,6 @@ const latestYoutubeVideo = (() => {
       const embed = idPattern.test(videoId) ? `https://www.youtube-nocookie.com/embed/${videoId}` : "";
       const url = video.url || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : youtubeSection?.dataset.channelUrl || "#");
       const subtitle = video.subtitle ? `<p>${escapeHtml(video.subtitle)}</p>` : "";
-      const publishedAt = video.publishedAt ? `<time datetime="${escapeHtml(video.publishedAt)}">${escapeHtml(video.publishedAt)}</time>` : "";
       const iframe = embed ? `<iframe class="youtube-embed" src="${embed}" title="${escapeHtml(video.title || "YouTube")}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>` : "";
       return `
         <article class="youtube-card${large ? " youtube-card-large" : ""}">
@@ -212,7 +213,6 @@ const latestYoutubeVideo = (() => {
           <div class="youtube-card-body">
             ${subtitle}
             <h3>${escapeHtml(video.title || "YouTube")}</h3>
-            ${publishedAt}
             <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">YouTubeで見る</a>
           </div>
         </article>
@@ -232,7 +232,7 @@ const latestYoutubeVideo = (() => {
         if (featured.length) featuredRoot.innerHTML = featured.slice(0, 3).map((video) => cardHtml(video)).join("");
         if (data.latest) {
           latestRoot.innerHTML = `
-            <p class="section-kicker muted-kicker">最新動画</p>
+            <p class="latest-video-label">最新動画</p>
             ${cardHtml(data.latest, true)}
           `;
         }
@@ -265,7 +265,7 @@ const latestYoutubeVideo = (() => {
           {worksSummaryItems.map((title) => <li>{title}</li>)}
         </ul>
         <p>
-          上記に該当しないお仕事でもお気軽にご相談ください
+          上記に該当しないお仕事でも<wbr />お気軽にご相談ください
         </p>
       </div>
       <div class="button-row centered">
@@ -278,7 +278,7 @@ const latestYoutubeVideo = (() => {
     <div class="section-inner">
       <p class="section-kicker">Contact</p>
       <h2 class="section-title">お問い合わせ</h2>
-      <p class="section-lead">ご希望の内容、時期、会場、対象者、予算感などを添えてお問い合わせください。</p>
+      <p class="section-lead">フォームに必要事項をご入力いただきお問い合わせください</p>
       <div class="button-row">
         <a class="button primary" href={url("/contact/")}>問い合わせる</a>
       </div>
