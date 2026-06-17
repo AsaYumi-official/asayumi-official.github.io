@@ -89,9 +89,9 @@ main {
 
 .brand-mark-image {
   align-items: center;
-  background: var(--ink);
+  background: transparent;
   border-radius: 999px;
-  color: var(--paper);
+  color: transparent;
   display: inline-flex;
   font-size: 0.9rem;
   flex: 0 0 34px;
@@ -117,7 +117,7 @@ main {
 
 .brand-mark-image span {
   align-items: center;
-  display: inline-flex;
+  display: none;
   font-family: system-ui, sans-serif;
   font-weight: 700;
   height: 34px;
@@ -125,6 +125,15 @@ main {
   position: relative;
   width: 34px;
   z-index: 0;
+}
+
+.brand-mark-image.is-fallback {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.brand-mark-image.is-fallback span {
+  display: inline-flex;
 }
 
 .brand-wordmark {
@@ -145,16 +154,16 @@ main {
   width: auto;
 }
 
-.brand-wordmark img:not([style*="display: none"]) + span {
-  display: grid;
-}
-
 .brand-wordmark span {
   color: var(--ink);
-  display: grid;
+  display: none;
   min-width: 0;
   opacity: 1;
   visibility: visible;
+}
+
+.brand-wordmark.is-fallback span {
+  display: grid;
 }
 
 .brand strong {
@@ -829,6 +838,10 @@ main {
   margin-top: 0.86em;
 }
 
+.profile-no-break {
+  white-space: nowrap;
+}
+
 .profile-member figure,
 .profile-gallery figure,
 .work-result-card img {
@@ -1276,16 +1289,16 @@ main {
   width: auto;
 }
 
-.footer-brand img:not([style*="display: none"]) + span {
-  display: inline-block;
-}
-
 .footer-brand span {
   color: var(--ink);
-  display: inline-block;
+  display: none;
   font-weight: 500;
   opacity: 1;
   visibility: visible;
+}
+
+.footer-brand.is-fallback span {
+  display: inline-block;
 }
 
 .site-footer p {
@@ -1320,7 +1333,8 @@ main {
   }
 
   .brand-wordmark img {
-    display: none;
+    display: block;
+    max-width: 118px;
   }
 
   .section {
@@ -1392,6 +1406,8 @@ main {
   .profile-member .prose {
     font-size: 0.94rem;
     line-height: 1.9;
+    overflow-wrap: normal;
+    word-break: normal;
   }
 
   .profile-gallery {
@@ -1426,12 +1442,26 @@ main {
   .calendar-event.sns {
     border-radius: 999px;
     display: inline-flex;
+    max-width: 100%;
+    overflow: visible;
+    padding-inline: 4px;
     width: auto;
   }
 
   .calendar-event.youtube .calendar-event-icons,
   .calendar-event.sns .calendar-event-icons {
     display: inline-flex;
+    gap: 1px;
+    justify-content: center;
+    max-width: 100%;
+  }
+
+  .calendar-event.youtube .calendar-event-icon,
+  .calendar-event.sns .calendar-event-icon,
+  .calendar-event.youtube .calendar-event-icon svg,
+  .calendar-event.sns .calendar-event-icon svg {
+    height: 11px;
+    width: 11px;
   }
 
   .calendar-event.youtube .calendar-event-text,

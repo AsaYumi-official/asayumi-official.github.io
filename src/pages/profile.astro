@@ -5,6 +5,13 @@ import profile from "../data/profile.json";
 const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
 const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${href.replace(/^\//, "")}`;
+const noBreakWords = ["メンデルスゾーン", "バリトンソロ", "ミュージカル", "レコーディング"];
+const noBreakPattern = new RegExp(`(${noBreakWords.join("|")})`, "g");
+const profileTextParts = (text: string) =>
+  text.split(noBreakPattern).map((part) => ({
+    text: part,
+    keep: noBreakWords.includes(part),
+  }));
 ---
 
 <BaseLayout title="Profile | あさゆみ" description="片倉旭、朝光ゆみによる声楽家夫婦デュオ「あさゆみ」のプロフィール。">
@@ -32,7 +39,13 @@ const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${h
                 <span>{member.roman}</span>
               </p>
               <div class="prose">
-                {member.body.map((paragraph) => <p>{paragraph}</p>)}
+                {member.body.map((paragraph) => (
+                  <p>
+                    {profileTextParts(paragraph).map((part) => (
+                      part.keep ? <span class="profile-no-break">{part.text}</span> : part.text
+                    ))}
+                  </p>
+                ))}
               </div>
             </div>
           </article>
