@@ -55,17 +55,21 @@ main {
 
 .site-header {
   align-items: center;
-  background: rgba(255, 253, 248, 0.92);
+  background: rgba(255, 253, 248, 0.98);
   border-bottom: 1px solid rgba(221, 209, 191, 0.72);
   display: flex;
   gap: 18px;
   justify-content: space-between;
   left: 0;
+  min-height: 64px;
+  opacity: 1;
   padding: 14px clamp(18px, 4vw, 52px);
   position: sticky;
   right: 0;
   top: 0;
-  z-index: 20;
+  transform: none;
+  visibility: visible;
+  z-index: 100;
   backdrop-filter: blur(18px);
 }
 
@@ -75,6 +79,8 @@ main {
   display: inline-flex;
   gap: 10px;
   min-width: 0;
+  opacity: 1;
+  visibility: visible;
 }
 
 .brand {
@@ -83,18 +89,25 @@ main {
 
 .brand-mark-image {
   align-items: center;
-  background: transparent;
+  background: var(--ink);
   border-radius: 999px;
-  color: var(--ink);
+  color: var(--paper);
   display: inline-flex;
   font-size: 0.9rem;
+  flex: 0 0 34px;
   height: 34px;
   justify-content: center;
   position: relative;
   width: 34px;
 }
 
-.brand-mark-image picture,
+.brand-mark-image picture {
+  display: block;
+  inset: 0;
+  position: absolute;
+  z-index: 1;
+}
+
 .brand-mark-image img {
   display: block;
   height: 34px;
@@ -103,24 +116,45 @@ main {
 }
 
 .brand-mark-image span {
-  display: none;
+  align-items: center;
+  display: inline-flex;
+  font-family: system-ui, sans-serif;
+  font-weight: 700;
+  height: 34px;
+  justify-content: center;
+  position: relative;
+  width: 34px;
+  z-index: 0;
 }
 
 .brand-wordmark {
-  display: inline-grid;
+  align-items: center;
+  display: inline-flex;
+  gap: 10px;
   min-width: 0;
+  opacity: 1;
+  visibility: visible;
 }
 
 .brand-wordmark img {
+  flex: 0 1 auto;
   height: auto;
-  max-height: 34px;
-  max-width: 150px;
+  max-height: 30px;
+  max-width: 118px;
   object-fit: contain;
   width: auto;
 }
 
 .brand-wordmark img:not([style*="display: none"]) + span {
-  display: none;
+  display: grid;
+}
+
+.brand-wordmark span {
+  color: var(--ink);
+  display: grid;
+  min-width: 0;
+  opacity: 1;
+  visibility: visible;
 }
 
 .brand strong {
@@ -142,6 +176,8 @@ main {
   display: none;
   font-family: system-ui, sans-serif;
   gap: clamp(12px, 1.8vw, 22px);
+  opacity: 1;
+  visibility: visible;
 }
 
 .desktop-nav a {
@@ -199,7 +235,9 @@ main {
 }
 
 .mobile-nav {
+  opacity: 1;
   position: relative;
+  visibility: visible;
 }
 
 .mobile-nav summary {
@@ -224,6 +262,7 @@ main {
   background: var(--ink);
   display: block;
   height: 1px;
+  opacity: 1;
   width: 16px;
 }
 
@@ -1214,42 +1253,63 @@ main {
 
 .site-footer {
   align-items: start;
+  background: var(--paper);
   border-top: 1px solid var(--line);
   display: grid;
   gap: 22px;
+  min-height: 120px;
+  opacity: 1;
   padding: 38px clamp(20px, 5vw, 72px);
+  visibility: visible;
 }
 
 .footer-brand {
   font-size: 1.5rem;
+  color: var(--ink);
 }
 
 .footer-brand img {
+  height: auto;
   max-height: 42px;
-  max-width: 160px;
+  max-width: 132px;
   object-fit: contain;
+  width: auto;
 }
 
 .footer-brand img:not([style*="display: none"]) + span {
-  display: none;
+  display: inline-block;
+}
+
+.footer-brand span {
+  color: var(--ink);
+  display: inline-block;
+  font-weight: 500;
+  opacity: 1;
+  visibility: visible;
 }
 
 .site-footer p {
   color: var(--muted);
   line-height: 1.8;
   margin: 8px 0 0;
+  opacity: 1;
+  visibility: visible;
 }
 
 .footer-links {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
+  opacity: 1;
+  visibility: visible;
 }
 
 .copyright {
   color: var(--muted);
   font-family: system-ui, sans-serif;
   font-size: 0.9rem;
+  opacity: 1;
+  visibility: visible;
 }
 
 @media (max-width: 759px) {
@@ -1260,7 +1320,7 @@ main {
   }
 
   .brand-wordmark img {
-    max-width: 118px;
+    display: none;
   }
 
   .section {
