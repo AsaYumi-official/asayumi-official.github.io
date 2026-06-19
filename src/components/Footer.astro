@@ -8,7 +8,7 @@ const url = (href: string) => `${import.meta.env.BASE_URL.replace(/\/?$/, "/")}$
 <footer class="site-footer">
   <div>
     <a class="footer-brand" href={url("/")}>
-      <img src={url("/images/logo-wordmark.svg")} alt="あさゆみ ロゴ" onerror="this.style.display='none'" />
+      <img src={url("/images/logo-wordmark.svg")} alt="あさゆみ ロゴ" onerror="this.closest('.footer-brand').classList.add('is-fallback'); this.style.display='none'" />
       <span>あさゆみ</span>
     </a>
     <p>東京藝術大学卒の声楽家夫婦デュオ</p>
