@@ -46,11 +46,6 @@ const schedule = await getScheduleData();
     const prev = document.querySelector<HTMLButtonElement>("[data-prev]");
     const next = document.querySelector<HTMLButtonElement>("[data-next]");
     const events = JSON.parse(shell?.dataset.schedule || "[]") as ScheduleEvent[];
-    const labels: Record<string, string> = {
-      performance: "出演予定",
-      youtube: "YouTube",
-      sns: "SNS",
-    };
     const escapeHtml = (value = "") => value
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
@@ -88,6 +83,14 @@ const schedule = await getScheduleData();
     const eventParts = (value: string) => {
       const [eventYear, eventMonth, eventDay] = value.split("-").map(Number);
       return { eventYear, eventMonth: eventMonth - 1, eventDay };
+    };
+    const formatEventDateTime = (event: ScheduleEvent) => {
+      const [, eventMonth, eventDay] = event.date.split("-").map(Number);
+      return `${eventMonth}月${eventDay}日 ${event.time || ""}`.trim();
+    };
+    const formatEventDescription = (description = "") => {
+      if (description === "最新動画を投稿予定。" || description === "最新動画を公開予定。") return "最新動画を投稿予定";
+      return description;
     };
 
     function renderCalendar() {
@@ -149,10 +152,10 @@ const schedule = await getScheduleData();
           wrapper.setAttribute("rel", "noopener noreferrer");
         }
         wrapper.innerHTML = `
-          <span>${event.date} ${event.time || ""} / ${labels[event.type] || event.label}</span>
-          <strong>${event.title}</strong>
-          <small>${event.location || ""}</small>
-          <p>${event.description || ""}</p>
+          <span>${formatEventDateTime(event)} / ${escapeHtml(event.title)}</span>
+          <strong>${escapeHtml(event.title)}</strong>
+          <small>${escapeHtml(event.location || "")}</small>
+          <p>${escapeHtml(formatEventDescription(event.description))}</p>
         `;
         list.append(wrapper);
       });

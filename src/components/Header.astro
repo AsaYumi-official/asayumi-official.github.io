@@ -17,6 +17,10 @@ const linkHref = (href: string) => href.startsWith("http") ? href : url(href);
 
 <header class="site-header">
   <a class="brand" href={url("/")}>
+    <span class="brand-mark-image">
+      <img src={url("/images/brand-mark-on-white.svg")} alt="" aria-hidden="true" onerror="this.closest('.brand-mark-image').classList.add('is-fallback'); this.style.display='none'" />
+      <span>A</span>
+    </span>
     <span class="brand-wordmark">
       <img src={url("/images/logo-wordmark.svg")} alt="あさゆみ ロゴ" onerror="this.closest('.brand-wordmark').classList.add('is-fallback'); this.style.display='none'" />
       <span>
