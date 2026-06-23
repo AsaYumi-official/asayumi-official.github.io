@@ -28,7 +28,7 @@ const formAction = siteApi.endpoint || contact.action;
     <div class="section-inner narrow">
       <p class="section-kicker">Form</p>
       <h2 class="section-title section-title-medium" data-form-title>{firstCategory.label}</h2>
-      <p class="section-lead" data-form-intro>{firstCategory.intro}</p>
+      <p class="section-lead" data-form-intro hidden={!firstCategory.intro}>{firstCategory.intro}</p>
 
       <iframe class="hidden-submit-frame" name="contact-submit-frame" title="contact-submit-frame"></iframe>
 
@@ -117,7 +117,6 @@ const formAction = siteApi.endpoint || contact.action;
             <input type="text" name="website" tabindex="-1" autocomplete="off" />
           </label>
 
-          <p class="form-note">個人レッスンの場合、基本的に男性は旭・女性はゆみが担当しますが、ご希望があればお伝えください。</p>
           <div class="form-grid">
             <label>
               <span>お名前</span>
@@ -151,6 +150,13 @@ const formAction = siteApi.endpoint || contact.action;
               <span>内容詳細</span>
               <textarea name="message" rows="7" placeholder="例：発表会に向けて発声と歌唱を見てほしいです。"></textarea>
             </label>
+            <div class="full checkbox-field">
+              <p>個人レッスンの場合、基本的に男性は旭・女性はゆみが担当しますが、ご希望があればお伝えください。</p>
+              <label class="checkbox-inline">
+                <input type="checkbox" name="acknowledgeLessonInstructor" value="確認しました" required />
+                <span>確認しました</span>
+              </label>
+            </div>
           </div>
 
           <p class="form-status" data-form-status aria-live="polite"></p>
@@ -298,7 +304,10 @@ const formAction = siteApi.endpoint || contact.action;
       });
 
       if (title) title.textContent = category.label;
-      if (intro) intro.textContent = category.intro;
+      if (intro) {
+        intro.textContent = category.intro;
+        intro.hidden = !category.intro;
+      }
     };
 
     cards.forEach((card) => {

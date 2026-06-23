@@ -12,6 +12,28 @@ const profileTextParts = (text: string) =>
     text: part,
     keep: noBreakWords.includes(part),
   }));
+const mobileLineMap: Record<string, string[]> = {
+  "片倉 旭|シューベルトを中心とするドイツリートの研究と演奏活動に取り組むほか、ベートーヴェン《交響曲第九番》、メンデルスゾーン《エリヤ》、マーラー《さすらう若人の歌》などバリトンソロを務める。": [
+    "シューベルトを中心とするドイツリートの研究と",
+    "演奏活動に取り組むほか、",
+    "ベートーヴェン《交響曲第九番》、メンデルスゾーン《エリヤ》、",
+    "マーラー《さすらう若人の歌》など",
+    "バリトンソロを務める。",
+  ],
+  "片倉 旭|オペラでは木下牧子《陰陽師》、フィリップ・グラス《恐るべき子供たち》など、現代作品に積極的に出演している。趣味はゲーム。": [
+    "オペラでは木下牧子《陰陽師》、",
+    "フィリップ・グラス《恐るべき子供たち》など、",
+    "現代作品に積極的に出演している。趣味はゲーム。",
+  ],
+  "朝光 ゆみ|クラシックだけでなくポップスやミュージカル、映画音楽などもレパートリーに持ち、アニメ・ゲームの歌入り劇伴レコーディングやコンサートにも多数参加。": [
+    "クラシックだけでなくポップスやミュージカル、映画音楽などもレパートリーに持ち、",
+    "アニメ・ゲームの歌入り劇伴レコーディングや",
+    "コンサートにも多数参加。",
+  ],
+};
+const normalizeProfileText = (text: string) => text.replace(/\n/g, "");
+const mobileLinesFor = (memberName: string, paragraph: string) =>
+  mobileLineMap[`${memberName}|${normalizeProfileText(paragraph)}`];
 ---
 
 <BaseLayout title="Profile | あさゆみ" description="片倉旭、朝光ゆみによる声楽家夫婦デュオ「あさゆみ」のプロフィール。">
@@ -41,7 +63,13 @@ const profileTextParts = (text: string) =>
               <div class="prose">
                 {member.body.map((paragraph) => (
                   <p>
-                    {profileTextParts(paragraph).map((part) => (
+                    {mobileLinesFor(member.name, paragraph)?.map((line) => (
+                      <span class="profile-mobile-line">
+                        {profileTextParts(line).map((part) => (
+                          part.keep ? <span class="profile-no-break">{part.text}</span> : part.text
+                        ))}
+                      </span>
+                    )) || profileTextParts(paragraph).map((part) => (
                       part.keep ? <span class="profile-no-break">{part.text}</span> : part.text
                     ))}
                   </p>

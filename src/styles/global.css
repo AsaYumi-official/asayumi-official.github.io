@@ -842,6 +842,10 @@ main {
   white-space: nowrap;
 }
 
+.profile-mobile-line {
+  display: inline;
+}
+
 .profile-member figure,
 .profile-gallery figure,
 .work-result-card img {
@@ -1408,6 +1412,10 @@ main {
     line-height: 1.9;
     overflow-wrap: normal;
     word-break: normal;
+  }
+
+  .profile-mobile-line {
+    display: block;
   }
 
   .profile-gallery {
