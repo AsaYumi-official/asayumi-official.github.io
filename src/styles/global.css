@@ -543,6 +543,12 @@ main {
   margin-top: 34px;
 }
 
+.cms-empty-message {
+  color: var(--muted);
+  line-height: 1.8;
+  margin: 0;
+}
+
 .news-card {
   align-items: center;
   background: rgba(255, 255, 255, 0.82);

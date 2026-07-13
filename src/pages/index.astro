@@ -4,7 +4,6 @@ import { getCollection } from "astro:content";
 import hero from "../data/homeHero.json";
 import youtube from "../data/youtube.json";
 import { getWorksData } from "../lib/contentSources";
-import { getCmsEndpoint } from "../lib/siteCms";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const url = (href: string) => `${basePath}${href.replace(/^\//, "")}`;
@@ -32,7 +31,6 @@ const videoIdFromUrl = (href: string) => {
     return "";
   }
 };
-const cmsEndpoint = getCmsEndpoint();
 const heroLeadLines = hero.lead.split("\n");
 const youtubeVideos = youtube.featured.map((video) => {
   const videoId = videoIdPattern.test(video.videoId) ? video.videoId : videoIdFromUrl(video.url);
@@ -93,7 +91,7 @@ const latestYoutubeVideo = (() => {
     <div class="section-inner">
       <p class="section-kicker">News</p>
       <h2 class="section-title">お知らせ</h2>
-      <div class="news-list compact-news">
+      <div class="news-list compact-news" data-home-news data-base-path={basePath}>
         {latestNews.map((post) => (
           <a class="news-card" href={url(`/news/${slugFromId(post.id)}/`)}>
             <div>
@@ -113,7 +111,7 @@ const latestYoutubeVideo = (() => {
     </div>
   </section>
 
-  <section class="section" data-youtube-section data-cms-endpoint={cmsEndpoint} data-channel-url={youtube.channelUrl}>
+  <section class="section" data-youtube-section data-channel-url={youtube.channelUrl}>
     <div class="section-inner">
       <p class="section-kicker">YouTube</p>
       <h2 class="section-title section-title-medium">{youtube.title}</h2>
@@ -163,85 +161,134 @@ const latestYoutubeVideo = (() => {
   </section>
 
   <script>
-    type CmsVideo = {
-      title?: string;
-      subtitle?: string;
-      url?: string;
-      videoId?: string;
-      publishedAt?: string;
-    };
-
-    type CmsYoutube = {
-      featured?: CmsVideo[];
-      latest?: CmsVideo;
-      channelUrl?: string;
-    };
+    import {
+      fetchCmsNews,
+      fetchCmsYoutube,
+      getYoutubeEmbedUrl,
+      getYoutubeWatchUrl,
+      type CmsNews,
+      type CmsVideo,
+    } from "../lib/siteCmsClient";
 
     const youtubeSection = document.querySelector<HTMLElement>("[data-youtube-section]");
     const featuredRoot = document.querySelector<HTMLElement>("[data-youtube-featured]");
     const latestRoot = document.querySelector<HTMLElement>("[data-youtube-latest]");
-    const idPattern = /^[0-9A-Za-z_-]{11}$/;
 
-    const escapeHtml = (value = "") => value
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;");
+    const emptyMessage = (message: string) => {
+      const element = document.createElement("p");
+      element.className = "cms-empty-message";
+      element.textContent = message;
+      return element;
+    };
 
-    const getVideoId = (video: CmsVideo) => {
-      if (video.videoId && idPattern.test(video.videoId)) return video.videoId;
-      if (!video.url) return "";
-      try {
-        const parsed = new URL(video.url);
-        if (parsed.hostname.includes("youtu.be")) return parsed.pathname.replace("/", "");
-        if (parsed.pathname.startsWith("/shorts/")) return parsed.pathname.split("/")[2] || "";
-        return parsed.searchParams.get("v") || "";
-      } catch {
-        return "";
+    const videoCard = (video: CmsVideo, large = false) => {
+      const article = document.createElement("article");
+      article.className = `youtube-card${large ? " youtube-card-large" : ""}`;
+      const embedUrl = getYoutubeEmbedUrl(video);
+      if (embedUrl) {
+        const iframe = document.createElement("iframe");
+        iframe.className = "youtube-embed";
+        iframe.src = embedUrl;
+        iframe.title = video.title;
+        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+        iframe.allowFullscreen = true;
+        article.append(iframe);
       }
-    };
 
-    const cardHtml = (video: CmsVideo, large = false) => {
-      const videoId = getVideoId(video);
-      const embed = idPattern.test(videoId) ? `https://www.youtube-nocookie.com/embed/${videoId}` : "";
-      const url = video.url || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : youtubeSection?.dataset.channelUrl || "#");
-      const subtitle = video.subtitle ? `<p>${escapeHtml(video.subtitle)}</p>` : "";
-      const iframe = embed ? `<iframe class="youtube-embed" src="${embed}" title="${escapeHtml(video.title || "YouTube")}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>` : "";
-      return `
-        <article class="youtube-card${large ? " youtube-card-large" : ""}">
-          ${iframe}
-          <div class="youtube-card-body">
-            ${subtitle}
-            <h3>${escapeHtml(video.title || "YouTube")}</h3>
-            <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">YouTubeで見る</a>
-          </div>
-        </article>
-      `;
+      const body = document.createElement("div");
+      body.className = "youtube-card-body";
+      if (video.subtitle) {
+        const subtitle = document.createElement("p");
+        subtitle.textContent = video.subtitle;
+        body.append(subtitle);
+      }
+      const heading = document.createElement("h3");
+      heading.textContent = video.title;
+      body.append(heading);
+      const watchUrl = getYoutubeWatchUrl(video) || youtubeSection?.dataset.channelUrl;
+      if (watchUrl) {
+        const link = document.createElement("a");
+        link.href = watchUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "YouTubeで見る";
+        body.append(link);
+      }
+      article.append(body);
+      return article;
     };
-
-    const endpointWithTarget = (endpoint: string, target: string) => `${endpoint}${endpoint.includes("?") ? "&" : "?"}target=${target}`;
 
     const loadYoutubeFromCms = async () => {
-      const endpoint = youtubeSection?.dataset.cmsEndpoint;
-      if (!endpoint || !featuredRoot || !latestRoot) return;
-      try {
-        const response = await fetch(endpointWithTarget(endpoint, "youtube"));
-        if (!response.ok) return;
-        const data = await response.json() as CmsYoutube;
-        const featured = Array.isArray(data.featured) ? data.featured : [];
-        if (featured.length) featuredRoot.innerHTML = featured.slice(0, 3).map((video) => cardHtml(video)).join("");
-        if (data.latest) {
-          latestRoot.innerHTML = `
-            <p class="latest-video-label">最新動画</p>
-            ${cardHtml(data.latest, true)}
-          `;
-        }
-      } catch (error) {
-        console.warn("YouTube CMS fetch failed", error);
-      }
+      if (!featuredRoot || !latestRoot) return;
+      const result = await fetchCmsYoutube();
+      if (!result.ok) return;
+
+      featuredRoot.replaceChildren(
+        ...(result.data.featured.length
+          ? result.data.featured.map((video) => videoCard(video))
+          : [emptyMessage("現在公開中の動画はありません。")]),
+      );
+      const latestLabel = document.createElement("p");
+      latestLabel.className = "latest-video-label";
+      latestLabel.textContent = "最新動画";
+      latestRoot.replaceChildren(
+        latestLabel,
+        result.data.latest ? videoCard(result.data.latest, true) : emptyMessage("現在、最新動画はありません。"),
+      );
     };
 
     loadYoutubeFromCms();
+
+    const homeNewsRoot = document.querySelector<HTMLElement>("[data-home-news]");
+
+    const newsDetailUrl = (item: CmsNews, basePath: string) => {
+      const identifier = item.id || item.slug;
+      return identifier ? `${basePath}news/detail/?id=${encodeURIComponent(identifier)}` : undefined;
+    };
+
+    const newsCard = (item: CmsNews, basePath: string, headingLevel: "h2" | "h3") => {
+      const href = newsDetailUrl(item, basePath);
+      const card = document.createElement(href ? "a" : "article");
+      card.className = "news-card";
+      if (href && card instanceof HTMLAnchorElement) card.href = href;
+      const copy = document.createElement("div");
+      const itemDate = document.createElement("time");
+      itemDate.dateTime = item.date;
+      itemDate.textContent = item.date;
+      const heading = document.createElement(headingLevel);
+      heading.textContent = item.title;
+      copy.append(itemDate, heading);
+      if (item.summary) {
+        const summary = document.createElement("p");
+        summary.textContent = item.summary;
+        copy.append(summary);
+      }
+      card.append(copy);
+      if (item.imageUrl) {
+        const image = document.createElement("img");
+        image.src = item.imageUrl;
+        image.alt = item.imageAlt || item.title;
+        image.loading = "lazy";
+        image.addEventListener("error", () => image.remove());
+        card.append(image);
+      }
+      return card;
+    };
+
+    const loadHomeNewsFromCms = async () => {
+      if (!homeNewsRoot) return;
+      const result = await fetchCmsNews();
+      if (!result.ok) return;
+      const basePath = homeNewsRoot.dataset.basePath || "/";
+      const items = result.data.slice(0, 2);
+      homeNewsRoot.replaceChildren(
+        ...(items.length
+          ? items.map((item) => newsCard(item, basePath, "h3"))
+          : [emptyMessage("現在お知らせはありません。")]),
+      );
+    };
+
+    loadHomeNewsFromCms();
   </script>
 
   <section class="section band">
