@@ -28,12 +28,14 @@ const schedule = await getScheduleData();
   </section>
 
   <script>
+    import { fetchCmsSchedule, safeUrl, type CmsSchedule } from "../lib/siteCmsClient";
+
     type ScheduleEvent = {
       date: string;
       time?: string;
       title: string;
       type: string;
-      label: string;
+      label?: string;
       location?: string;
       url?: string;
       description?: string;
@@ -45,12 +47,10 @@ const schedule = await getScheduleData();
     const list = document.querySelector<HTMLElement>("[data-event-list]");
     const prev = document.querySelector<HTMLButtonElement>("[data-prev]");
     const next = document.querySelector<HTMLButtonElement>("[data-next]");
-    const events = JSON.parse(shell?.dataset.schedule || "[]") as ScheduleEvent[];
-    const escapeHtml = (value = "") => value
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;");
+    const sortEvents = (items: CmsSchedule[]) => [...items].sort((a, b) =>
+      `${a.date}T${a.time || "00:00"}`.localeCompare(`${b.date}T${b.time || "00:00"}`),
+    );
+    let events = sortEvents(JSON.parse(shell?.dataset.schedule || "[]") as CmsSchedule[]);
     const socialIcon = (icon: "youtube" | "instagram" | "tiktok" | "x", label: string) => {
       const icons = {
         youtube: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7.5c.2-1 1-1.8 2-2C8 5.2 12 5.2 12 5.2s4 0 5.5.3c1 .2 1.8 1 2 2 .3 1.6.3 4.5.3 4.5s0 2.9-.3 4.5c-.2 1-1 1.8-2 2-1.5.3-5.5.3-5.5.3s-4 0-5.5-.3c-1-.2-1.8-1-2-2-.3-1.6-.3-4.5-.3-4.5s0-2.9.3-4.5Z"/><path d="m10.2 9.5 4.5 2.5-4.5 2.5v-5Z"/></svg>',
@@ -58,21 +58,34 @@ const schedule = await getScheduleData();
         tiktok: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5v9.2a3.8 3.8 0 1 1-3.8-3.8"/><path d="M14 5c.6 2.4 2.1 4 4.5 4.6"/></svg>',
         x: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>',
       };
-      return `<span class="calendar-event-icon" title="${escapeHtml(label)}">${icons[icon]}</span>`;
+      const element = document.createElement("span");
+      element.className = "calendar-event-icon";
+      element.title = label;
+      element.innerHTML = icons[icon];
+      return element;
     };
     const eventIcons = (event: ScheduleEvent) => {
-      const text = `${event.type} ${event.label} ${event.title} ${event.location || ""}`.toLowerCase();
-      const icons: string[] = [];
+      const text = `${event.type} ${event.label} ${event.title} ${event.location || ""} ${event.description || ""} ${event.url || ""}`.toLowerCase();
+      const icons: HTMLElement[] = [];
       if (event.type === "youtube" || text.includes("youtube")) icons.push(socialIcon("youtube", "YouTube"));
       if (text.includes("instagram")) icons.push(socialIcon("instagram", "Instagram"));
       if (text.includes("tiktok")) icons.push(socialIcon("tiktok", "TikTok"));
       if (text.includes("x ")) icons.push(socialIcon("x", "X"));
-      return icons.join("");
+      return icons;
     };
-    const calendarEventHtml = (event: ScheduleEvent) => {
+    const appendCalendarEvent = (root: HTMLElement, event: ScheduleEvent) => {
       const icons = eventIcons(event);
-      const iconMarkup = icons ? `<span class="calendar-event-icons" aria-hidden="true">${icons}</span>` : "";
-      return `${iconMarkup}<span class="calendar-event-text">${escapeHtml(event.title)}</span>`;
+      if (icons.length) {
+        const iconContainer = document.createElement("span");
+        iconContainer.className = "calendar-event-icons";
+        iconContainer.setAttribute("aria-hidden", "true");
+        iconContainer.append(...icons);
+        root.append(iconContainer);
+      }
+      const eventText = document.createElement("span");
+      eventText.className = "calendar-event-text";
+      eventText.textContent = event.title;
+      root.append(eventText);
     };
     let cursor = new Date();
     cursor.setDate(1);
@@ -92,6 +105,14 @@ const schedule = await getScheduleData();
       if (description === "最新動画を投稿予定。" || description === "最新動画を公開予定。") return "最新動画を投稿予定";
       return description;
     };
+    const isYoutubeShort = (event: ScheduleEvent) =>
+      [event.title, event.label]
+        .filter((value): value is string => Boolean(value))
+        .some((value) => value.toLocaleLowerCase().includes("ショート") || value.toLocaleLowerCase().includes("short"));
+    const showInMonthlyList = (event: ScheduleEvent) => {
+      const type = event.type.toLocaleLowerCase();
+      return type === "performance" || (type === "youtube" && !isYoutubeShort(event));
+    };
 
     function renderCalendar() {
       if (!title || !grid || !list) return;
@@ -103,6 +124,7 @@ const schedule = await getScheduleData();
         const parts = eventParts(event.date);
         return parts.eventYear === year && parts.eventMonth === month;
       });
+      const monthlyListEvents = monthEvents.filter(showInMonthlyList);
 
       title.textContent = formatMonth(cursor);
       grid.innerHTML = "";
@@ -125,38 +147,50 @@ const schedule = await getScheduleData();
         const dayEvents = monthEvents.filter((event) => event.date === key);
         const cell = document.createElement("div");
         cell.className = "calendar-day";
-        cell.innerHTML = `<strong>${day}</strong>`;
+        const dayNumber = document.createElement("strong");
+        dayNumber.textContent = String(day);
+        cell.append(dayNumber);
         dayEvents.forEach((event) => {
-          const item = event.url ? document.createElement("a") : document.createElement("span");
+          const eventUrl = safeUrl(event.url);
+          const item = eventUrl ? document.createElement("a") : document.createElement("span");
           item.className = `calendar-event ${event.type}`;
-          item.innerHTML = calendarEventHtml(event);
           item.setAttribute("aria-label", event.title);
           item.setAttribute("title", event.title);
-          if (event.url) {
-            item.setAttribute("href", event.url);
+          if (eventUrl && item instanceof HTMLAnchorElement) {
+            item.href = eventUrl;
             item.setAttribute("target", "_blank");
             item.setAttribute("rel", "noopener noreferrer");
           }
+          appendCalendarEvent(item, event);
           cell.append(item);
         });
         grid.append(cell);
       }
 
-      list.innerHTML = monthEvents.length ? "" : "<p>この月の予定はまだありません。</p>";
-      monthEvents.forEach((event) => {
-        const wrapper = event.url ? document.createElement("a") : document.createElement("article");
+      list.replaceChildren();
+      if (!monthlyListEvents.length) {
+        const empty = document.createElement("p");
+        empty.textContent = "この月の予定はまだありません。";
+        list.append(empty);
+      }
+      monthlyListEvents.forEach((event) => {
+        const eventUrl = safeUrl(event.url);
+        const wrapper = eventUrl ? document.createElement("a") : document.createElement("article");
         wrapper.className = "monthly-event-card";
-        if (event.url) {
-          wrapper.setAttribute("href", event.url);
+        if (eventUrl && wrapper instanceof HTMLAnchorElement) {
+          wrapper.href = eventUrl;
           wrapper.setAttribute("target", "_blank");
           wrapper.setAttribute("rel", "noopener noreferrer");
         }
-        wrapper.innerHTML = `
-          <span>${formatEventDateTime(event)} / ${escapeHtml(event.title)}</span>
-          <strong>${escapeHtml(event.title)}</strong>
-          <small>${escapeHtml(event.location || "")}</small>
-          <p>${escapeHtml(formatEventDescription(event.description))}</p>
-        `;
+        const dateAndTitle = document.createElement("span");
+        dateAndTitle.textContent = `${formatEventDateTime(event)} / ${event.title}`;
+        const heading = document.createElement("strong");
+        heading.textContent = event.title;
+        const location = document.createElement("small");
+        location.textContent = event.location || "";
+        const description = document.createElement("p");
+        description.textContent = formatEventDescription(event.description);
+        wrapper.append(dateAndTitle, heading, location, description);
         list.append(wrapper);
       });
     }
@@ -170,5 +204,14 @@ const schedule = await getScheduleData();
       renderCalendar();
     });
     renderCalendar();
+
+    const loadScheduleFromCms = async () => {
+      const result = await fetchCmsSchedule();
+      if (!result.ok) return;
+      events = sortEvents(result.data);
+      renderCalendar();
+    };
+
+    loadScheduleFromCms();
   </script>
 </BaseLayout>

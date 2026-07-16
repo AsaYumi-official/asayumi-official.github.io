@@ -15,7 +15,7 @@ const achievements = [...worksData.achievements]
     <div class="section-inner">
       <p class="section-kicker">Works</p>
       <h1 class="section-title">活動実績</h1>
-      <p class="section-lead works-lead">コンサート、学校公演、式典演奏、メディア出演、レコーディングなどこれまでの活動をまとめています。</p>
+      <p class="section-lead works-lead"><span class="text-keep">「あさゆみ」として</span><span class="text-keep">出演させていただいた</span><span class="text-keep">これまでの活動を</span><span class="text-keep">まとめています。</span><span class="text-keep">（ソロ活動は掲載しておりません）</span></p>
 
       <div class="filter-bar" aria-label="実績カテゴリ">
         {categories.map((category, index) => (
@@ -23,11 +23,11 @@ const achievements = [...worksData.achievements]
         ))}
       </div>
 
-      <div class="works-results">
+      <div class="works-results" data-works-results>
         {achievements.map((work) => (
-          <article class="work-result-card" data-category={work.category}>
+          <article class:list={["work-result-card", !work.image && "work-result-card--without-image"]} data-category={work.category}>
             {work.image && (
-              <img src={asset(work.image)} alt={`${work.title}の写真`} loading="lazy" onerror="this.style.display='none'" />
+              <img src={asset(work.image)} alt={`${work.title}の写真`} loading="lazy" onerror="this.remove(); this.parentElement?.classList.add('work-result-card--without-image')" />
             )}
             <div>
               <div class="work-meta">
@@ -45,23 +45,95 @@ const achievements = [...worksData.achievements]
   </section>
 
   <script>
+    import { fetchCmsWorks, type CmsWork } from "../lib/siteCmsClient";
+
     const buttons = document.querySelectorAll<HTMLButtonElement>(".filter-button");
-    const cards = document.querySelectorAll<HTMLElement>(".work-result-card");
+    const results = document.querySelector<HTMLElement>("[data-works-results]");
+    let activeFilter = "すべて";
+
+    const applyFilter = (filter: string) => {
+      if (!results) return;
+      results.querySelectorAll<HTMLElement>(".work-result-card").forEach((card) => {
+        const matches = filter === "すべて" || card.dataset.category === filter;
+        card.hidden = !matches;
+        card.classList.toggle("is-hidden", !matches);
+      });
+    };
+
+    const emptyMessage = () => {
+      const element = document.createElement("p");
+      element.className = "cms-empty-message";
+      element.textContent = "現在活動実績はありません。";
+      return element;
+    };
+
+    const workCard = (work: CmsWork) => {
+      const card = document.createElement("article");
+      card.className = "work-result-card";
+      card.dataset.category = work.category;
+      if (work.imageUrl) {
+        const image = document.createElement("img");
+        image.src = work.imageUrl;
+        image.alt = `${work.title}の写真`;
+        image.loading = "lazy";
+        image.addEventListener("error", () => {
+          image.remove();
+          card.classList.add("work-result-card--without-image");
+        });
+        card.append(image);
+      } else {
+        card.classList.add("work-result-card--without-image");
+      }
+      const copy = document.createElement("div");
+      const meta = document.createElement("div");
+      meta.className = "work-meta";
+      const itemDate = document.createElement("time");
+      itemDate.dateTime = work.date;
+      itemDate.textContent = work.date;
+      const category = document.createElement("span");
+      category.textContent = work.category;
+      meta.append(itemDate, category);
+      const heading = document.createElement("h2");
+      heading.textContent = work.title;
+      copy.append(meta, heading);
+      if (work.location) {
+        const location = document.createElement("p");
+        location.className = "work-location";
+        location.textContent = work.location;
+        copy.append(location);
+      }
+      if (work.description) {
+        const description = document.createElement("p");
+        description.textContent = work.description;
+        copy.append(description);
+      }
+      card.append(copy);
+      return card;
+    };
 
     buttons.forEach((button) => {
       button.addEventListener("click", () => {
         const filter = button.dataset.filter || "すべて";
+        activeFilter = filter;
         buttons.forEach((item) => {
           const active = item === button;
           item.setAttribute("aria-pressed", String(active));
           item.classList.toggle("is-active", active);
         });
-        cards.forEach((card) => {
-          const matches = filter === "すべて" || card.dataset.category === filter;
-          card.hidden = !matches;
-          card.classList.toggle("is-hidden", !matches);
-        });
+        applyFilter(filter);
       });
     });
+
+    const loadWorksFromCms = async () => {
+      if (!results) return;
+      const result = await fetchCmsWorks();
+      if (!result.ok) return;
+      results.replaceChildren(
+        ...(result.data.length ? result.data.map(workCard) : [emptyMessage()]),
+      );
+      applyFilter(activeFilter);
+    };
+
+    loadWorksFromCms();
   </script>
 </BaseLayout>

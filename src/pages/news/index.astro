@@ -17,16 +17,16 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
       <p class="section-kicker">News</p>
       <h1 class="section-title">お知らせ</h1>
       <p class="section-lead">公演情報、演奏依頼、レッスン、YouTubeなどの最新情報を掲載します。</p>
-      <div class="news-list">
+      <div class="news-list" data-news-list data-base-path={basePath}>
         {posts.map((post) => (
-          <a class="news-card" href={url(`/news/${slugFromId(post.id)}/`)}>
+          <a class:list={["news-card", !post.data.image && "news-card--without-image"]} href={url(`/news/${slugFromId(post.id)}/`)}>
             <div>
               <time datetime={formatDate(post.data.date)}>{formatDate(post.data.date)}</time>
               <h2>{post.data.title}</h2>
               <p>{post.data.summary}</p>
             </div>
             {post.data.image && (
-              <img src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} loading="lazy" onerror="this.style.display='none'" />
+              <img src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} loading="lazy" onerror="this.remove(); this.parentElement?.classList.add('news-card--without-image')" />
             )}
           </a>
         ))}
@@ -36,4 +36,71 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
       </div>
     </div>
   </section>
+
+  <script>
+    import { fetchCmsNews, type CmsNews } from "../../lib/siteCmsClient";
+
+    const newsRoot = document.querySelector<HTMLElement>("[data-news-list]");
+
+    const emptyMessage = () => {
+      const element = document.createElement("p");
+      element.className = "cms-empty-message";
+      element.textContent = "現在お知らせはありません。";
+      return element;
+    };
+
+    const detailUrl = (item: CmsNews, basePath: string) => {
+      const identifier = item.id || item.slug;
+      return identifier ? `${basePath}news/detail/?id=${encodeURIComponent(identifier)}` : undefined;
+    };
+
+    const newsCard = (item: CmsNews, basePath: string) => {
+      const href = detailUrl(item, basePath);
+      const card = document.createElement(href ? "a" : "article");
+      card.className = "news-card";
+      if (!item.imageUrl) card.classList.add("news-card--without-image");
+      if (href && card instanceof HTMLAnchorElement) card.href = href;
+
+      const copy = document.createElement("div");
+      const itemDate = document.createElement("time");
+      itemDate.dateTime = item.date;
+      itemDate.textContent = item.date;
+      const heading = document.createElement("h2");
+      heading.textContent = item.title;
+      copy.append(itemDate, heading);
+      if (item.summary) {
+        const summary = document.createElement("p");
+        summary.textContent = item.summary;
+        copy.append(summary);
+      }
+      card.append(copy);
+
+      if (item.imageUrl) {
+        const image = document.createElement("img");
+        image.src = item.imageUrl;
+        image.alt = item.imageAlt || item.title;
+        image.loading = "lazy";
+        image.addEventListener("error", () => {
+          image.remove();
+          card.classList.add("news-card--without-image");
+        });
+        card.append(image);
+      }
+      return card;
+    };
+
+    const loadNewsFromCms = async () => {
+      if (!newsRoot) return;
+      const result = await fetchCmsNews();
+      if (!result.ok) return;
+      const basePath = newsRoot.dataset.basePath || "/";
+      newsRoot.replaceChildren(
+        ...(result.data.length
+          ? result.data.map((item) => newsCard(item, basePath))
+          : [emptyMessage()]),
+      );
+    };
+
+    loadNewsFromCms();
+  </script>
 </BaseLayout>

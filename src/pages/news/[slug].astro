@@ -32,7 +32,7 @@ const ogImage = post.data.image || "/images/ogp.jpg";
       <h1 class="section-title section-title-medium">{post.data.title}</h1>
       <p class="section-lead">{post.data.summary}</p>
       {post.data.image && (
-        <img class="news-detail-image" src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} onerror="this.style.display='none'" />
+        <img class="news-detail-image" src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} loading="lazy" onerror="this.style.display='none'" />
       )}
       <div class="article-body">
         <Content />

@@ -1,210 +1,83 @@
 # あさゆみ公式サイト
 
-東京藝術大学卒の声楽家夫婦デュオ「あさゆみ」の公式サイトです。
-
-演奏依頼、レッスン／ワークショップ、メディア／取材／広報関連のお問い合わせにつなげることを主目的にした、Astro 製の静的サイトです。
+東京藝術大学卒の声楽家夫婦デュオ「あさゆみ」の公式サイトです。Astroで生成する静的サイトに、Googleスプレッドシート「あさゆみHP」をブラウザから読み込むCMS機能を組み合わせています。
 
 ## 技術構成
 
 - Astro
-- 静的サイト
-- GitHub Pages
-- コンテンツは `src/data/*.json` と `src/content/news/*.md` に分離
+- 静的サイト / GitHub Pages
+- Google Apps Script（Googleスプレッドシートの公開CMS）
+- ローカルJSON・Markdownによる通信失敗時のfallback
 
 ## ページ構成
 
 - Home: `/`
-- Profile: `/profile/`
+- News: `/news/`
 - Works: `/works/`
 - Schedule: `/schedule/`
+- Profile: `/profile/`
 - Contact: `/contact/`
 - Shop: `/shop/`
 
-## ローカル起動
+## ローカル起動とビルド
 
 ```bash
 npm install
 npm run dev
-```
-
-ブラウザで `http://localhost:4321/` を開きます。
-
-## ビルド
-
-```bash
+npm run check
 npm run build
-npm run preview
 ```
 
-## GitHub Pages での公開
+## スプレッドシートでの日常更新
 
-`.github/workflows/deploy.yml` に GitHub Pages 用のワークフローを入れています。
+スプレッドシートを保存してからサイトを再読み込みすると、最新の公開データが反映されます。通常のコンテンツ更新では、GitHubへのpush・PR・再デプロイは不要です。
 
-1. GitHub のリポジトリ設定で Pages の Source を `GitHub Actions` にします。
-2. `main` ブランチへマージします。
-3. GitHub Actions が `npm ci` と `npm run build` を実行します。
-4. `dist/` が GitHub Pages にデプロイされます。
+| タブ | 更新される場所 | 主な更新内容 |
+| --- | --- | --- |
+| `Youtube` | Home | `latest` で最新動画1件、`featured` で代表動画最大3件 |
+| `News` | Home・News一覧・News詳細 | お知らせ本文、画像、公開状態 |
+| `Works` | Works | 活動実績、カテゴリ、画像、公開状態 |
+| `Schedule` | Schedule | カレンダー、当月一覧、公開状態 |
 
-公開URLの想定:
+### GAS endpoint
+
+公開CMS endpointは [`src/data/siteApi.json`](src/data/siteApi.json) だけで管理します。必ず次のような `script.google.com/macros/s/.../exec` のURLを保存してください。
 
 ```text
-https://asayumi-official.github.io/
+https://script.google.com/macros/s/.../exec
 ```
 
-## 更新方法
+`script.googleusercontent.com/macros/echo` 形式のURLを `siteApi.json` に保存しないでください。
 
-Pages CMS などを後から導入しやすいように、更新頻度の高い情報は JSON と Markdown に分けています。
+サイトは `youtube` / `news` / `works` / `schedule` を個別に取得します。`Inquiries` は問い合わせPOST保存専用です。公開CMSのGET対象には含めず、ブラウザ側で読み込み・表示もしません。
 
-| 内容 | ファイル |
-| --- | --- |
-| Home Hero | `src/data/homeHero.json` |
-| News | `src/content/news/*.md` |
-| Schedule | `src/data/schedule.json` |
-| Works | `src/data/works.json` |
-| Profile | `src/data/profile.json` |
-| YouTube 最新動画 | `src/data/youtube.json` |
-| FAQ | `src/data/faq.json` |
-| SNSリンク | `src/data/sns.json` |
-| Contactフォーム | `src/data/contact.json` |
+### 公開状態と入力値
 
-### News の追加方法
+- `published` は `true`、`"true"`、`"TRUE"`、`1`、`"1"` を公開として扱います。`false`、`"false"`、`"FALSE"`、`0`、`"0"` は非公開です。
+- `published` 列がない既存データは後方互換のため表示します。
+- `News` の `id` または `slug` は一意にしてください。値がある記事は `/news/detail/?id=...` の詳細ページを開けます。
+- `imageUrl` にはブラウザで直接開ける公開画像URLを入力してください。
+- リンク・画像URLには `https://`、`http://`、またはサイト内の `/` から始まるパスだけを使用してください。
+- YouTubeのiframeには11文字の動画IDから作る `https://www.youtube-nocookie.com/embed/{videoId}` だけを使います。
 
-`src/content/news/` に Markdown ファイルを追加します。ファイル名は `YYYY-MM-DD-title.md` のようにしておくと管理しやすいです。
+## fallbackについて
 
-```md
----
-title: "お知らせタイトル"
-date: 2026-06-10
-summary: "一覧に表示する短い説明"
-image: "/images/news-example.jpg"
-imageAlt: "画像の説明"
-published: true
----
+CMSへの通信、HTTP応答、JSON解析に失敗した場合は、静的ビルド時のローカルデータを表示します。
 
-本文をここに書きます。
-```
+- YouTube: `src/data/youtube.json`
+- News: `src/content/news/*.md`
+- Works: `src/data/works.json`
+- Schedule: `src/data/schedule.json`
 
-`published: false` にすると下書きとして残せます。
+CMSが正常に空配列を返した場合はfallbackへ戻らず、「お知らせはありません」などの空表示になります。
 
-### Works の追加方法
+## GitHub Pagesでの公開
 
-`src/data/works.json` を編集します。
-
-- Home の活動内容は `activities`
-- Works ページの活動実績は `achievements`
-
-Works ページで使うカテゴリは、現在以下に絞っています。
-
-- コンサート
-- 学校・公共施設
-- イベント・式典
-- メディア出演
-- レコーディング
-
-レッスン単体は活動実績ページには出さず、Contact の「レッスン／ワークショップ」導線で扱います。
-
-### Schedule の追加方法
-
-`src/data/schedule.json` に予定を追加します。
-
-```json
-{
-  "date": "2026-09-21",
-  "time": "14:00",
-  "title": "あさゆみ 2ndリサイタル 大阪公演",
-  "type": "performance",
-  "label": "出演予定",
-  "location": "大阪",
-  "url": "",
-  "description": "大阪でのリサイタル公演。"
-}
-```
-
-`type` は `performance` / `youtube` / `sns` を想定しています。
-
-### YouTube 最新動画
-
-<<<<<<< ours
-`src/data/youtube.json` にHomeへ固定表示する3本の動画を置いています。
-
-各動画は `title` / `subtitle` / `url` / `videoId` を持ちます。iframe には `videoId` から生成した `https://www.youtube-nocookie.com/embed/{videoId}` だけを使います。`videoId` が空の場合のみ `url` から抽出し、取得できない場合はそのカードのiframeを出さずにYouTubeへのリンクだけを表示します。
-
-`.github/workflows/deploy.yml` では1日1回の定期ビルドと手動実行 `workflow_dispatch` を設定しています。現在のYouTube表示は固定データのため、動画差し替え時は `src/data/youtube.json` を更新して再ビルドします。
-
-### Google Sheets 簡易CMS化の方針
-
-まだCMSは導入せず、現在はローカルJSON/Markdownを正とします。将来、GoogleスプレッドシートとApps Script JSON endpointへ移行する場合は、`src/lib/contentSources.ts` の取得先を環境変数で切り替えます。
-=======
-HomeのYouTubeは、Googleスプレッドシート「あさゆみHP」を公開するGoogle Apps Script JSON endpointから取得します。取得できない場合は `src/data/youtube.json` のfallbackを表示します。
-
-`youtube.featured` が代表動画3本、`youtube.latest` が最新動画1本です。Youtubeタブの `latest` 行を書き換えると、Homeの最新動画枠が変わります。`featured` 行は代表動画3本です。
-
-各動画は `title` / `subtitle` / `url` / `videoId` を持ちます。iframe には `videoId` から生成した `https://www.youtube-nocookie.com/embed/{videoId}` だけを使います。`videoId` が空の場合のみ `url` から抽出し、取得できない場合はそのカードのiframeを出さずにYouTubeへのリンクだけを表示します。
-
-`.github/workflows/deploy.yml` では1日1回の定期ビルドと手動実行 `workflow_dispatch` を設定しています。YouTubeはブラウザ側でもGAS endpointを取得するため、CORSが許可されていればスプレッドシート変更だけで差し替わります。取得できない場合は `src/data/youtube.json` をfallbackとして使います。
-
-### Google Sheets 簡易CMS化の方針
-
-GAS endpoint URLは `src/data/siteApi.json` で管理します。取得処理の土台は `src/lib/siteCms.ts` にまとめています。
-
-News / Works / Schedule は今後同じGAS endpointから連動予定です。現時点ではページ側の既存表示を壊さないよう、取得失敗時にローカルJSON/Markdownまたは空配列へfallbackする構造にしています。
-
-Inquiries は問い合わせ保存専用で、公開JSONには含めません。サイト側でInquiriesを読み込んだり表示したりしないでください。
-
-imageUrl には画像ファイル本体ではなく、公開済み画像のURLを入れてください。
->>>>>>> theirs
-
-想定する環境変数:
-
-- `WORKS_JSON_ENDPOINT`
-- `SCHEDULE_JSON_ENDPOINT`
-
-推奨列:
-
-News:
-
-- `title`
-- `date`
-- `summary`
-- `body`
-- `image`
-- `imageAlt`
-- `published`
-
-Works:
-
-- `date`
-- `title`
-- `category`
-- `location`
-- `description`
-- `image`
-
-Schedule:
-
-- `date`
-- `time`
-- `title`
-- `type`
-- `label`
-- `location`
-- `url`
-- `description`
-
-Google Sheets JSON endpointを使う場合も、取得失敗時はローカルJSON/Markdownをfallbackとして使う構成にします。GitHub Actionsの定期ビルドにより、外部データを定期的に反映できます。
+初回公開やサイトコード・デザイン変更時は、`main` へ反映してGitHub Actionsからビルド・デプロイします。日常的なYouTube、News、Works、Scheduleの更新は上記のスプレッドシート運用で行います。
 
 ## 公開前に差し替える項目
 
-<<<<<<< ours
-- `src/data/youtube.json` の `videos`
-=======
-- `src/data/youtube.json` の `featured` / `latest`
->>>>>>> theirs
-- `src/data/contact.json` の Google Apps Script Web App URL
-- `src/data/homeHero.json` の `image`
-- `public/images/` 配下のロゴ、プロフィール、Works、News、OGP画像
-- プロフィール本文、出演歴、公演情報
-
-## デザイン方針
-
-白と淡いベージュを基調に、余白を広く取り、スマートフォンで読みやすい構成にしています。Home の Hero は縦長写真を扱いやすい2カラム構成です。
+- `src/data/contact.json` の問い合わせ用Google Apps Script URL
+- `src/data/homeHero.json` の画像
+- `public/images/` 配下のロゴ、プロフィール、Works、OGP画像
+- プロフィール本文、出演歴
