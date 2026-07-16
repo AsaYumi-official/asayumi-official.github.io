@@ -65,7 +65,7 @@ const schedule = await getScheduleData();
       return element;
     };
     const eventIcons = (event: ScheduleEvent) => {
-      const text = `${event.type} ${event.label} ${event.title} ${event.location || ""}`.toLowerCase();
+      const text = `${event.type} ${event.label} ${event.title} ${event.location || ""} ${event.description || ""} ${event.url || ""}`.toLowerCase();
       const icons: HTMLElement[] = [];
       if (event.type === "youtube" || text.includes("youtube")) icons.push(socialIcon("youtube", "YouTube"));
       if (text.includes("instagram")) icons.push(socialIcon("instagram", "Instagram"));
@@ -105,6 +105,14 @@ const schedule = await getScheduleData();
       if (description === "最新動画を投稿予定。" || description === "最新動画を公開予定。") return "最新動画を投稿予定";
       return description;
     };
+    const isYoutubeShort = (event: ScheduleEvent) =>
+      [event.title, event.label]
+        .filter((value): value is string => Boolean(value))
+        .some((value) => value.toLocaleLowerCase().includes("ショート") || value.toLocaleLowerCase().includes("short"));
+    const showInMonthlyList = (event: ScheduleEvent) => {
+      const type = event.type.toLocaleLowerCase();
+      return type === "performance" || (type === "youtube" && !isYoutubeShort(event));
+    };
 
     function renderCalendar() {
       if (!title || !grid || !list) return;
@@ -116,6 +124,7 @@ const schedule = await getScheduleData();
         const parts = eventParts(event.date);
         return parts.eventYear === year && parts.eventMonth === month;
       });
+      const monthlyListEvents = monthEvents.filter(showInMonthlyList);
 
       title.textContent = formatMonth(cursor);
       grid.innerHTML = "";
@@ -159,12 +168,12 @@ const schedule = await getScheduleData();
       }
 
       list.replaceChildren();
-      if (!monthEvents.length) {
+      if (!monthlyListEvents.length) {
         const empty = document.createElement("p");
         empty.textContent = "この月の予定はまだありません。";
         list.append(empty);
       }
-      monthEvents.forEach((event) => {
+      monthlyListEvents.forEach((event) => {
         const eventUrl = safeUrl(event.url);
         const wrapper = eventUrl ? document.createElement("a") : document.createElement("article");
         wrapper.className = "monthly-event-card";

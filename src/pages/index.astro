@@ -93,14 +93,14 @@ const latestYoutubeVideo = (() => {
       <h2 class="section-title">お知らせ</h2>
       <div class="news-list compact-news" data-home-news data-base-path={basePath}>
         {latestNews.map((post) => (
-          <a class="news-card" href={url(`/news/${slugFromId(post.id)}/`)}>
+          <a class:list={["news-card", !post.data.image && "news-card--without-image"]} href={url(`/news/${slugFromId(post.id)}/`)}>
             <div>
               <time datetime={formatDate(post.data.date)}>{formatDate(post.data.date)}</time>
               <h3>{post.data.title}</h3>
               <p>{post.data.summary}</p>
             </div>
             {post.data.image && (
-              <img src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} loading="lazy" onerror="this.style.display='none'" />
+              <img src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} loading="lazy" onerror="this.remove(); this.parentElement?.classList.add('news-card--without-image')" />
             )}
           </a>
         ))}
@@ -115,6 +115,26 @@ const latestYoutubeVideo = (() => {
     <div class="section-inner">
       <p class="section-kicker">YouTube</p>
       <h2 class="section-title section-title-medium">{youtube.title}</h2>
+      <div class="youtube-latest" data-youtube-latest>
+        <p class="latest-video-label">最新動画</p>
+        <article class="youtube-card youtube-card-large">
+          {latestYoutubeVideo.embedUrl && (
+            <iframe
+              class="youtube-embed"
+              src={latestYoutubeVideo.embedUrl}
+              title={latestYoutubeVideo.title}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          )}
+            <div class="youtube-card-body">
+            {latestYoutubeVideo.subtitle && <p>{latestYoutubeVideo.subtitle}</p>}
+            <h3>{latestYoutubeVideo.title}</h3>
+            <a href={latestYoutubeVideo.url} target="_blank" rel="noopener noreferrer">YouTubeで見る</a>
+          </div>
+        </article>
+      </div>
       <div class="youtube-grid" data-youtube-featured>
         {youtubeVideos.map((video) => (
           <article class="youtube-card">
@@ -123,6 +143,7 @@ const latestYoutubeVideo = (() => {
                 class="youtube-embed"
                 src={video.embedUrl}
                 title={video.title}
+                loading="lazy"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowfullscreen
               ></iframe>
@@ -134,25 +155,6 @@ const latestYoutubeVideo = (() => {
             </div>
           </article>
         ))}
-      </div>
-      <div class="youtube-latest" data-youtube-latest>
-        <p class="latest-video-label">最新動画</p>
-        <article class="youtube-card youtube-card-large">
-          {latestYoutubeVideo.embedUrl && (
-            <iframe
-              class="youtube-embed"
-              src={latestYoutubeVideo.embedUrl}
-              title={latestYoutubeVideo.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-            ></iframe>
-          )}
-            <div class="youtube-card-body">
-            {latestYoutubeVideo.subtitle && <p>{latestYoutubeVideo.subtitle}</p>}
-            <h3>{latestYoutubeVideo.title}</h3>
-            <a href={latestYoutubeVideo.url} target="_blank" rel="noopener noreferrer">YouTubeで見る</a>
-          </div>
-        </article>
       </div>
       <div class="button-row centered">
         <a class="button secondary" href={youtube.channelUrl} target="_blank" rel="noopener noreferrer">YouTubeを見る</a>
@@ -190,6 +192,7 @@ const latestYoutubeVideo = (() => {
         iframe.className = "youtube-embed";
         iframe.src = embedUrl;
         iframe.title = video.title;
+        iframe.loading = "lazy";
         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
         iframe.allowFullscreen = true;
         article.append(iframe);
@@ -237,8 +240,6 @@ const latestYoutubeVideo = (() => {
       );
     };
 
-    loadYoutubeFromCms();
-
     const homeNewsRoot = document.querySelector<HTMLElement>("[data-home-news]");
 
     const newsDetailUrl = (item: CmsNews, basePath: string) => {
@@ -250,6 +251,7 @@ const latestYoutubeVideo = (() => {
       const href = newsDetailUrl(item, basePath);
       const card = document.createElement(href ? "a" : "article");
       card.className = "news-card";
+      if (!item.imageUrl) card.classList.add("news-card--without-image");
       if (href && card instanceof HTMLAnchorElement) card.href = href;
       const copy = document.createElement("div");
       const itemDate = document.createElement("time");
@@ -269,7 +271,10 @@ const latestYoutubeVideo = (() => {
         image.src = item.imageUrl;
         image.alt = item.imageAlt || item.title;
         image.loading = "lazy";
-        image.addEventListener("error", () => image.remove());
+        image.addEventListener("error", () => {
+          image.remove();
+          card.classList.add("news-card--without-image");
+        });
         card.append(image);
       }
       return card;
@@ -280,7 +285,9 @@ const latestYoutubeVideo = (() => {
       const result = await fetchCmsNews();
       if (!result.ok) return;
       const basePath = homeNewsRoot.dataset.basePath || "/";
-      const items = result.data.slice(0, 2);
+      const items = [...result.data]
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .slice(0, 2);
       homeNewsRoot.replaceChildren(
         ...(items.length
           ? items.map((item) => newsCard(item, basePath, "h3"))
@@ -288,7 +295,7 @@ const latestYoutubeVideo = (() => {
       );
     };
 
-    loadHomeNewsFromCms();
+    void Promise.all([loadYoutubeFromCms(), loadHomeNewsFromCms()]);
   </script>
 
   <section class="section band">

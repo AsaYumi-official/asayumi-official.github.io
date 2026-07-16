@@ -355,6 +355,10 @@ main {
   word-break: keep-all;
 }
 
+.works-lead {
+  text-wrap: pretty;
+}
+
 .text-keep {
   white-space: nowrap;
 }
@@ -590,6 +594,10 @@ main {
   height: auto;
   object-fit: cover;
   width: 100%;
+}
+
+.news-card.news-card--without-image {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .narrow {
@@ -860,6 +868,10 @@ main {
   border-radius: 8px;
   margin: 0;
   overflow: hidden;
+}
+
+.work-result-card.work-result-card--without-image {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .profile-member img {

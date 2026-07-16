@@ -19,14 +19,14 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
       <p class="section-lead">公演情報、演奏依頼、レッスン、YouTubeなどの最新情報を掲載します。</p>
       <div class="news-list" data-news-list data-base-path={basePath}>
         {posts.map((post) => (
-          <a class="news-card" href={url(`/news/${slugFromId(post.id)}/`)}>
+          <a class:list={["news-card", !post.data.image && "news-card--without-image"]} href={url(`/news/${slugFromId(post.id)}/`)}>
             <div>
               <time datetime={formatDate(post.data.date)}>{formatDate(post.data.date)}</time>
               <h2>{post.data.title}</h2>
               <p>{post.data.summary}</p>
             </div>
             {post.data.image && (
-              <img src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} loading="lazy" onerror="this.style.display='none'" />
+              <img src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} loading="lazy" onerror="this.remove(); this.parentElement?.classList.add('news-card--without-image')" />
             )}
           </a>
         ))}
@@ -58,6 +58,7 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
       const href = detailUrl(item, basePath);
       const card = document.createElement(href ? "a" : "article");
       card.className = "news-card";
+      if (!item.imageUrl) card.classList.add("news-card--without-image");
       if (href && card instanceof HTMLAnchorElement) card.href = href;
 
       const copy = document.createElement("div");
@@ -79,7 +80,10 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
         image.src = item.imageUrl;
         image.alt = item.imageAlt || item.title;
         image.loading = "lazy";
-        image.addEventListener("error", () => image.remove());
+        image.addEventListener("error", () => {
+          image.remove();
+          card.classList.add("news-card--without-image");
+        });
         card.append(image);
       }
       return card;

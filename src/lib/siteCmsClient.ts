@@ -148,7 +148,9 @@ const normalizeNewsItem = (value: unknown): CmsNews | null => {
     title,
     summary: optionalText(value.summary),
     body: optionalText(value.body),
-    imageUrl: safeUrl(value.imageUrl) || safeUrl(value.image),
+    // News images are supplied only through the Sheets `imageUrl` column.
+    // `imageAlt` is text for the alt attribute and must never be treated as a URL.
+    imageUrl: safeUrl(value.imageUrl),
     imageAlt: optionalText(value.imageAlt),
   };
 };

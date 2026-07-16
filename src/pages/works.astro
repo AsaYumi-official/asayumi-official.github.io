@@ -15,7 +15,7 @@ const achievements = [...worksData.achievements]
     <div class="section-inner">
       <p class="section-kicker">Works</p>
       <h1 class="section-title">活動実績</h1>
-      <p class="section-lead works-lead">コンサート、学校公演、式典演奏、メディア出演、レコーディングなどこれまでの活動をまとめています。</p>
+      <p class="section-lead works-lead"><span class="text-keep">「あさゆみ」として</span><span class="text-keep">出演させていただいた</span><span class="text-keep">これまでの活動を</span><span class="text-keep">まとめています。</span><span class="text-keep">（ソロ活動は掲載しておりません）</span></p>
 
       <div class="filter-bar" aria-label="実績カテゴリ">
         {categories.map((category, index) => (
@@ -25,9 +25,9 @@ const achievements = [...worksData.achievements]
 
       <div class="works-results" data-works-results>
         {achievements.map((work) => (
-          <article class="work-result-card" data-category={work.category}>
+          <article class:list={["work-result-card", !work.image && "work-result-card--without-image"]} data-category={work.category}>
             {work.image && (
-              <img src={asset(work.image)} alt={`${work.title}の写真`} loading="lazy" onerror="this.style.display='none'" />
+              <img src={asset(work.image)} alt={`${work.title}の写真`} loading="lazy" onerror="this.remove(); this.parentElement?.classList.add('work-result-card--without-image')" />
             )}
             <div>
               <div class="work-meta">
@@ -76,8 +76,13 @@ const achievements = [...worksData.achievements]
         image.src = work.imageUrl;
         image.alt = `${work.title}の写真`;
         image.loading = "lazy";
-        image.addEventListener("error", () => image.remove());
+        image.addEventListener("error", () => {
+          image.remove();
+          card.classList.add("work-result-card--without-image");
+        });
         card.append(image);
+      } else {
+        card.classList.add("work-result-card--without-image");
       }
       const copy = document.createElement("div");
       const meta = document.createElement("div");

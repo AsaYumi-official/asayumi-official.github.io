@@ -81,6 +81,7 @@ const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
         image.className = "news-detail-image";
         image.src = item.imageUrl;
         image.alt = item.imageAlt || item.title;
+        image.loading = "lazy";
         image.addEventListener("error", () => image.remove());
         contentRoot.append(image);
       }
