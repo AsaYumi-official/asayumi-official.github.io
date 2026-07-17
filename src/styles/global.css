@@ -553,6 +553,103 @@ main {
   margin: 0;
 }
 
+.cms-skeleton-card,
+.cms-detail-skeleton {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 22px;
+}
+
+.cms-skeleton-line,
+.cms-skeleton-media,
+.cms-skeleton-cell {
+  animation: cms-skeleton-shimmer 1.5s ease-in-out infinite;
+  background: linear-gradient(100deg, rgba(226, 215, 198, 0.5) 25%, rgba(255, 255, 255, 0.9) 45%, rgba(226, 215, 198, 0.5) 65%);
+  background-size: 220% 100%;
+  border-radius: 999px;
+  display: block;
+}
+
+.cms-skeleton-line {
+  height: 13px;
+  width: 100%;
+}
+
+.cms-skeleton-line-short {
+  width: 26%;
+}
+
+.cms-skeleton-line-title {
+  height: 23px;
+  width: 72%;
+}
+
+.cms-skeleton-line-heading {
+  height: 42px;
+  width: min(72%, 420px);
+}
+
+.cms-skeleton-media {
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.cms-youtube-skeleton-card {
+  min-height: 300px;
+}
+
+.cms-work-skeleton-card {
+  min-height: 180px;
+}
+
+[data-home-news][aria-busy="true"] {
+  min-height: 330px;
+}
+
+[data-news-list][aria-busy="true"] {
+  min-height: 500px;
+}
+
+[data-works-results][aria-busy="true"] {
+  min-height: 580px;
+}
+
+[data-youtube-latest][aria-busy="true"] {
+  min-height: 390px;
+}
+
+[data-youtube-featured][aria-busy="true"] {
+  min-height: 920px;
+}
+
+.news-detail[aria-busy="true"] [data-news-detail-content] {
+  min-height: 520px;
+}
+
+.cms-detail-skeleton {
+  margin-top: 22px;
+}
+
+@keyframes cms-skeleton-shimmer {
+  to {
+    background-position: -220% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cms-skeleton-line,
+  .cms-skeleton-media,
+  .cms-skeleton-cell {
+    animation: none;
+  }
+}
+
 .news-card {
   align-items: center;
   background: rgba(255, 255, 255, 0.82);
@@ -1025,6 +1122,28 @@ main {
   border-radius: 8px;
   margin-top: 34px;
   padding: clamp(16px, 3vw, 28px);
+}
+
+.calendar-loading {
+  display: grid;
+  gap: 18px;
+  min-height: 620px;
+}
+
+.calendar-skeleton-week,
+.calendar-skeleton-grid {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.calendar-skeleton-grid {
+  grid-template-rows: repeat(5, minmax(62px, 1fr));
+}
+
+.cms-skeleton-cell {
+  border-radius: 6px;
+  min-height: 62px;
 }
 
 .calendar-header {
@@ -1513,6 +1632,14 @@ main {
 }
 
 @media (min-width: 760px) {
+  [data-youtube-featured][aria-busy="true"] {
+    min-height: 300px;
+  }
+
+  .calendar-loading {
+    min-height: 540px;
+  }
+
   .hero-inner {
     grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
   }

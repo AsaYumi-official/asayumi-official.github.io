@@ -53,9 +53,20 @@ export type CmsFetchResult<T> =
   | { ok: true; data: T }
   | { ok: false };
 
+export type CmsCacheEntry<T> = {
+  data: T;
+  fetchedAt: number;
+  isFresh: boolean;
+};
+
 const videoIdPattern = /^[0-9A-Za-z_-]{11}$/;
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 const timePattern = /^\d{1,2}:\d{2}$/;
+const CMS_CACHE_SCHEMA_VERSION = 1;
+const CMS_CACHE_PREFIX = "asayumi:cms-cache";
+const CMS_CACHE_FRESH_AGE_MS = 5 * 60 * 1000;
+const CMS_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const inFlightRequests = new Map<CmsTarget, Promise<CmsFetchResult<unknown>>>();
 
 const isRecord = (value: unknown): value is CmsRecord =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -240,24 +251,109 @@ const normalizeYoutube = (value: unknown): CmsYoutube | null => {
 
 const requestUrl = (target: CmsTarget) => {
   const separator = siteApi.endpoint.includes("?") ? "&" : "?";
-  return `${siteApi.endpoint}${separator}target=${encodeURIComponent(target)}&_=${Date.now()}`;
+  return `${siteApi.endpoint}${separator}target=${encodeURIComponent(target)}`;
 };
 
-const fetchCms = async <T>(target: CmsTarget, normalize: (value: unknown) => T | null): Promise<CmsFetchResult<T>> => {
+const cacheKey = (target: CmsTarget) => `${CMS_CACHE_PREFIX}:v${CMS_CACHE_SCHEMA_VERSION}:${target}`;
+
+const browserStorage = () => {
+  if (typeof window === "undefined") return undefined;
   try {
-    const response = await fetch(requestUrl(target), { cache: "no-store" });
-    if (!response.ok) return { ok: false };
-    const normalized = normalize(await response.json());
-    return normalized === null ? { ok: false } : { ok: true, data: normalized };
+    return window.localStorage;
   } catch {
-    return { ok: false };
+    return undefined;
   }
+};
+
+const removeCmsCache = (target: CmsTarget) => {
+  try {
+    browserStorage()?.removeItem(cacheKey(target));
+  } catch {
+    // Storage can be unavailable in private browsing contexts.
+  }
+};
+
+const readCmsCache = <T>(target: CmsTarget, normalize: (value: unknown) => T | null): CmsCacheEntry<T> | null => {
+  const storage = browserStorage();
+  if (!storage) return null;
+
+  try {
+    const raw = storage.getItem(cacheKey(target));
+    if (!raw) return null;
+    const cached: unknown = JSON.parse(raw);
+    if (!isRecord(cached)
+      || cached.schemaVersion !== CMS_CACHE_SCHEMA_VERSION
+      || typeof cached.fetchedAt !== "number"
+      || !Number.isFinite(cached.fetchedAt)
+      || !("data" in cached)) {
+      removeCmsCache(target);
+      return null;
+    }
+
+    const age = Date.now() - cached.fetchedAt;
+    if (age < 0 || age > CMS_CACHE_MAX_AGE_MS) {
+      removeCmsCache(target);
+      return null;
+    }
+
+    const data = normalize(cached.data);
+    if (data === null) {
+      removeCmsCache(target);
+      return null;
+    }
+
+    return { data, fetchedAt: cached.fetchedAt, isFresh: age <= CMS_CACHE_FRESH_AGE_MS };
+  } catch {
+    removeCmsCache(target);
+    return null;
+  }
+};
+
+const writeCmsCache = <T>(target: CmsTarget, data: T) => {
+  try {
+    browserStorage()?.setItem(cacheKey(target), JSON.stringify({
+      schemaVersion: CMS_CACHE_SCHEMA_VERSION,
+      fetchedAt: Date.now(),
+      data,
+    }));
+  } catch {
+    // A full or unavailable storage area must not prevent CMS rendering.
+  }
+};
+
+const fetchCms = <T>(target: CmsTarget, normalize: (value: unknown) => T | null): Promise<CmsFetchResult<T>> => {
+  const inFlight = inFlightRequests.get(target);
+  if (inFlight) return inFlight as Promise<CmsFetchResult<T>>;
+
+  const request = (async (): Promise<CmsFetchResult<T>> => {
+    try {
+      const response = await fetch(requestUrl(target), { cache: "no-store" });
+      if (!response.ok) return { ok: false };
+      const normalized = normalize(await response.json());
+      if (normalized === null) return { ok: false };
+      writeCmsCache(target, normalized);
+      return { ok: true, data: normalized };
+    } catch {
+      return { ok: false };
+    }
+  })();
+
+  inFlightRequests.set(target, request as Promise<CmsFetchResult<unknown>>);
+  void request.then(() => {
+    if (inFlightRequests.get(target) === request) inFlightRequests.delete(target);
+  });
+  return request;
 };
 
 export const fetchCmsYoutube = () => fetchCms("youtube", normalizeYoutube);
 export const fetchCmsNews = () => fetchCms("news", normalizeNews);
 export const fetchCmsWorks = () => fetchCms("works", normalizeWorks);
 export const fetchCmsSchedule = () => fetchCms("schedule", normalizeSchedule);
+
+export const getCmsYoutubeCache = () => readCmsCache("youtube", normalizeYoutube);
+export const getCmsNewsCache = () => readCmsCache("news", normalizeNews);
+export const getCmsWorksCache = () => readCmsCache("works", normalizeWorks);
+export const getCmsScheduleCache = () => readCmsCache("schedule", normalizeSchedule);
 
 export const getYoutubeEmbedUrl = (video: CmsVideo) =>
   video.videoId && videoIdPattern.test(video.videoId)

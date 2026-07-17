@@ -12,23 +12,47 @@ const schedule = await getScheduleData();
       <h1 class="section-title">予定カレンダー</h1>
       <p class="section-lead">出演予定、動画投稿、SNS投稿などを月ごとに確認できます。</p>
 
-      <div class="calendar-shell" data-schedule={JSON.stringify(schedule)}>
-        <div class="calendar-header">
-          <button type="button" class="calendar-nav" data-prev aria-label="前の月">＜</button>
-          <h2 data-calendar-title></h2>
-          <button type="button" class="calendar-nav" data-next aria-label="次の月">＞</button>
+      <div class="calendar-shell" data-schedule-fallback={JSON.stringify(schedule)} aria-busy="true">
+        <div class="calendar-loading cms-js-only" data-calendar-loading aria-live="polite">
+          <span class="cms-skeleton-line cms-skeleton-line-heading"></span>
+          <div class="calendar-skeleton-week"><span class="cms-skeleton-line"></span><span class="cms-skeleton-line"></span><span class="cms-skeleton-line"></span><span class="cms-skeleton-line"></span><span class="cms-skeleton-line"></span><span class="cms-skeleton-line"></span><span class="cms-skeleton-line"></span></div>
+          <div class="calendar-skeleton-grid">{Array.from({ length: 35 }, () => <span class="cms-skeleton-cell"></span>)}</div>
+          <span class="cms-skeleton-line cms-skeleton-line-title"></span>
+          <span class="cms-skeleton-line"></span>
+          <span class="cms-skeleton-line"></span>
         </div>
-        <div class="calendar-grid" data-calendar-grid></div>
-        <div class="monthly-events">
-          <h3>当月の予定</h3>
-          <div data-event-list></div>
+        <div data-calendar-content hidden>
+          <div class="calendar-header">
+            <button type="button" class="calendar-nav" data-prev aria-label="前の月">＜</button>
+            <h2 data-calendar-title></h2>
+            <button type="button" class="calendar-nav" data-next aria-label="次の月">＞</button>
+          </div>
+          <div class="calendar-grid" data-calendar-grid></div>
+          <div class="monthly-events">
+            <h3>当月の予定</h3>
+            <div data-event-list></div>
+          </div>
         </div>
+        <noscript>
+          <style>.calendar-loading { display: none !important; }</style>
+          <div class="monthly-events">
+            <h3>予定</h3>
+            {schedule.map((event) => (
+              <article class="monthly-event-card">
+                <span>{event.date} {event.time || ""} / {event.title}</span>
+                <strong>{event.title}</strong>
+                <small>{event.location || ""}</small>
+                <p>{event.description || ""}</p>
+              </article>
+            ))}
+          </div>
+        </noscript>
       </div>
     </div>
   </section>
 
   <script>
-    import { fetchCmsSchedule, safeUrl, type CmsSchedule } from "../lib/siteCmsClient";
+    import { fetchCmsSchedule, getCmsScheduleCache, safeUrl, type CmsSchedule } from "../lib/siteCmsClient";
 
     type ScheduleEvent = {
       date: string;
@@ -42,6 +66,8 @@ const schedule = await getScheduleData();
     };
 
     const shell = document.querySelector<HTMLElement>(".calendar-shell");
+    const calendarContent = document.querySelector<HTMLElement>("[data-calendar-content]");
+    const calendarLoading = document.querySelector<HTMLElement>("[data-calendar-loading]");
     const title = document.querySelector<HTMLElement>("[data-calendar-title]");
     const grid = document.querySelector<HTMLElement>("[data-calendar-grid]");
     const list = document.querySelector<HTMLElement>("[data-event-list]");
@@ -50,7 +76,15 @@ const schedule = await getScheduleData();
     const sortEvents = (items: CmsSchedule[]) => [...items].sort((a, b) =>
       `${a.date}T${a.time || "00:00"}`.localeCompare(`${b.date}T${b.time || "00:00"}`),
     );
-    let events = sortEvents(JSON.parse(shell?.dataset.schedule || "[]") as CmsSchedule[]);
+    let events: CmsSchedule[] = [];
+    const parseFallback = <T,>(value: string | undefined): T | null => {
+      if (!value) return null;
+      try {
+        return JSON.parse(value) as T;
+      } catch {
+        return null;
+      }
+    };
     const socialIcon = (icon: "youtube" | "instagram" | "tiktok" | "x", label: string) => {
       const icons = {
         youtube: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7.5c.2-1 1-1.8 2-2C8 5.2 12 5.2 12 5.2s4 0 5.5.3c1 .2 1.8 1 2 2 .3 1.6.3 4.5.3 4.5s0 2.9-.3 4.5c-.2 1-1 1.8-2 2-1.5.3-5.5.3-5.5.3s-4 0-5.5-.3c-1-.2-1.8-1-2-2-.3-1.6-.3-4.5-.3-4.5s0-2.9.3-4.5Z"/><path d="m10.2 9.5 4.5 2.5-4.5 2.5v-5Z"/></svg>',
@@ -115,7 +149,10 @@ const schedule = await getScheduleData();
     };
 
     function renderCalendar() {
-      if (!title || !grid || !list) return;
+      if (!title || !grid || !list || !calendarContent) return;
+      calendarContent.hidden = false;
+      if (calendarLoading) calendarLoading.hidden = true;
+      shell?.setAttribute("aria-busy", "false");
       const year = cursor.getFullYear();
       const month = cursor.getMonth();
       const firstDay = new Date(year, month, 1);
@@ -203,13 +240,26 @@ const schedule = await getScheduleData();
       cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
       renderCalendar();
     });
-    renderCalendar();
+    let scheduleSignature = "";
+    const renderSchedule = (items: CmsSchedule[]) => {
+      const signature = JSON.stringify(items);
+      if (signature === scheduleSignature) return;
+      scheduleSignature = signature;
+      events = sortEvents(items);
+      renderCalendar();
+    };
+
+    const scheduleFallback = parseFallback<CmsSchedule[]>(shell?.dataset.scheduleFallback);
+    const cachedSchedule = getCmsScheduleCache();
+    if (cachedSchedule) renderSchedule(cachedSchedule.data);
 
     const loadScheduleFromCms = async () => {
       const result = await fetchCmsSchedule();
-      if (!result.ok) return;
-      events = sortEvents(result.data);
-      renderCalendar();
+      if (result.ok) {
+        renderSchedule(result.data);
+        return;
+      }
+      if (!cachedSchedule && scheduleFallback) renderSchedule(scheduleFallback);
     };
 
     loadScheduleFromCms();

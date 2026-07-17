@@ -1,6 +1,7 @@
 ---
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import siteApi from "../data/siteApi.json";
 import "../styles/global.css";
 
 const {
@@ -16,6 +17,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://asayumi-off
 const ogImageUrl = ogImage.startsWith("http")
   ? ogImage
   : new URL(`${basePath}${ogImage.replace(/^\//, "")}`, Astro.site ?? "https://asayumi-official.github.io");
+const cmsOrigin = new URL(siteApi.endpoint).origin;
 ---
 
 <!doctype html>
@@ -23,6 +25,8 @@ const ogImageUrl = ogImage.startsWith("http")
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href={cmsOrigin} crossorigin />
+    <link rel="dns-prefetch" href={cmsOrigin} />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
