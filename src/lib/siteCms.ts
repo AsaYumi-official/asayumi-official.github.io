@@ -29,7 +29,7 @@ type CmsResponse<T> = T | Partial<Record<CmsTarget, T>>;
 
 const endpointWithTarget = (target: CmsTarget) => {
   const separator = siteApi.endpoint.includes("?") ? "&" : "?";
-  return `${siteApi.endpoint}${separator}target=${encodeURIComponent(target)}&_=${Date.now()}`;
+  return `${siteApi.endpoint}${separator}target=${encodeURIComponent(target)}`;
 };
 
 const unwrapTarget = <T>(payload: CmsResponse<T>, target: CmsTarget): T => {

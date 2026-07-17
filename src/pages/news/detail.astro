@@ -1,22 +1,59 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const asset = (href: string) => href.startsWith("http") ? href : `${basePath}${href.replace(/^\//, "")}`;
+const fallbackNews = (await getCollection("news", ({ data }) => data.published)).map((post) => {
+  const slug = post.id.replace(/\.md$/, "");
+  return {
+    id: slug,
+    slug,
+    date: post.data.date.toISOString().slice(0, 10),
+    title: post.data.title,
+    summary: post.data.summary,
+    body: post.body,
+    imageUrl: post.data.image ? asset(post.data.image) : undefined,
+    imageAlt: post.data.imageAlt || undefined,
+  };
+});
 ---
 
 <BaseLayout title="お知らせ | あさゆみ" description="あさゆみのお知らせ詳細。">
-  <article class="section news-detail" data-news-detail data-base-path={basePath}>
+  <article class="section news-detail" data-news-detail data-base-path={basePath} data-fallback={JSON.stringify(fallbackNews)} aria-busy="true">
     <div class="section-inner narrow" data-news-detail-content>
       <p class="section-kicker">News</p>
-      <p class="cms-empty-message">記事を読み込んでいます。</p>
+      <div class="cms-detail-skeleton cms-js-only" aria-hidden="true">
+        <span class="cms-skeleton-line cms-skeleton-line-short"></span>
+        <span class="cms-skeleton-line cms-skeleton-line-heading"></span>
+        <span class="cms-skeleton-line"></span>
+        <span class="cms-skeleton-line"></span>
+        <span class="cms-skeleton-media"></span>
+      </div>
+      <noscript>
+        <style>.cms-js-only { display: none !important; }</style>
+        <p class="cms-empty-message">JavaScriptが無効のため、ローカルのお知らせ一覧を表示しています。</p>
+        <div class="article-body">
+          {fallbackNews.map((item) => <p><a href={`${basePath}news/${item.slug}/`}>{item.date}　{item.title}</a></p>)}
+        </div>
+      </noscript>
     </div>
   </article>
 
   <script>
-    import { fetchCmsNews, type CmsNews } from "../../lib/siteCmsClient";
+    import { fetchCmsNews, getCmsNewsCache, type CmsNews } from "../../lib/siteCmsClient";
 
     const detailRoot = document.querySelector<HTMLElement>("[data-news-detail]");
     const contentRoot = document.querySelector<HTMLElement>("[data-news-detail-content]");
+
+    const parseFallback = <T,>(value: string | undefined): T | null => {
+      if (!value) return null;
+      try {
+        return JSON.parse(value) as T;
+      } catch {
+        return null;
+      }
+    };
 
     const addBackLink = (root: HTMLElement, basePath: string) => {
       const actions = document.createElement("div");
@@ -40,6 +77,7 @@ const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       heading.textContent = message;
       contentRoot.append(kicker, heading);
       addBackLink(contentRoot, basePath);
+      detailRoot?.setAttribute("aria-busy", "false");
     };
 
     const appendBody = (root: HTMLElement, body: string | undefined, summary: string | undefined) => {
@@ -57,8 +95,12 @@ const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       if (paragraphs.length) root.append(articleBody);
     };
 
+    let articleSignature = "";
     const renderArticle = (item: CmsNews, basePath: string) => {
       if (!contentRoot) return;
+      const signature = JSON.stringify(item);
+      if (signature === articleSignature) return;
+      articleSignature = signature;
       contentRoot.replaceChildren();
       const kicker = document.createElement("p");
       kicker.className = "section-kicker";
@@ -88,6 +130,7 @@ const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       appendBody(contentRoot, item.body, item.summary);
       addBackLink(contentRoot, basePath);
       document.title = `${item.title} | あさゆみ`;
+      detailRoot?.setAttribute("aria-busy", "false");
     };
 
     const loadArticle = async () => {
@@ -97,9 +140,17 @@ const basePath = import.meta.env.BASE_URL.replace(/\/?$/, "/");
         showMissing("記事が見つかりません", basePath);
         return;
       }
+      const fallbackNews = parseFallback<CmsNews[]>(detailRoot?.dataset.fallback) || [];
+      const cachedNews = getCmsNewsCache();
+      const cachedArticle = cachedNews?.data.find((item) => item.id === identifier || item.slug === identifier);
+      if (cachedArticle) renderArticle(cachedArticle, basePath);
       const result = await fetchCmsNews();
       if (!result.ok) {
-        showMissing("記事が見つかりません", basePath);
+        if (!cachedArticle) {
+          const fallbackArticle = fallbackNews.find((item) => item.id === identifier || item.slug === identifier);
+          if (fallbackArticle) renderArticle(fallbackArticle, basePath);
+          else showMissing("記事が見つかりません", basePath);
+        }
         return;
       }
       const article = result.data.find((item) => item.id === identifier || item.slug === identifier);

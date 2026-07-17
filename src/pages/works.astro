@@ -8,6 +8,10 @@ const worksData = await getWorksData();
 const achievements = [...worksData.achievements]
   .filter((work) => categories.includes(work.category))
   .sort((a, b) => b.date.localeCompare(a.date));
+const worksFallback = achievements.map((work) => ({
+  ...work,
+  imageUrl: work.image ? asset(work.image) : undefined,
+}));
 ---
 
 <BaseLayout title="Works | あさゆみ" description="あさゆみの終了済み出演予定、演奏実績、活動実績の一覧。">
@@ -23,33 +27,48 @@ const achievements = [...worksData.achievements]
         ))}
       </div>
 
-      <div class="works-results" data-works-results>
-        {achievements.map((work) => (
-          <article class:list={["work-result-card", !work.image && "work-result-card--without-image"]} data-category={work.category}>
-            {work.image && (
-              <img src={asset(work.image)} alt={`${work.title}の写真`} loading="lazy" onerror="this.remove(); this.parentElement?.classList.add('work-result-card--without-image')" />
-            )}
-            <div>
-              <div class="work-meta">
-                <time datetime={work.date}>{work.date}</time>
-                <span>{work.category}</span>
+      <div class="works-results" data-works-results data-fallback={JSON.stringify(worksFallback)} aria-busy="true">
+        <div class="cms-skeleton-card cms-work-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-media"></span><span class="cms-skeleton-line cms-skeleton-line-short"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
+        <div class="cms-skeleton-card cms-work-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-media"></span><span class="cms-skeleton-line cms-skeleton-line-short"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
+        <div class="cms-skeleton-card cms-work-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-media"></span><span class="cms-skeleton-line cms-skeleton-line-short"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
+        <noscript>
+          <style>.cms-js-only { display: none !important; }</style>
+          {achievements.map((work) => (
+            <article class:list={["work-result-card", !work.image && "work-result-card--without-image"]} data-category={work.category}>
+              {work.image && (
+                <img src={asset(work.image)} alt={`${work.title}の写真`} loading="lazy" onerror="this.remove(); this.parentElement?.classList.add('work-result-card--without-image')" />
+              )}
+              <div>
+                <div class="work-meta">
+                  <time datetime={work.date}>{work.date}</time>
+                  <span>{work.category}</span>
+                </div>
+                <h2>{work.title}</h2>
+                <p class="work-location">{work.location}</p>
+                <p>{work.description}</p>
               </div>
-              <h2>{work.title}</h2>
-              <p class="work-location">{work.location}</p>
-              <p>{work.description}</p>
-            </div>
-          </article>
-        ))}
+            </article>
+          ))}
+        </noscript>
       </div>
     </div>
   </section>
 
   <script>
-    import { fetchCmsWorks, type CmsWork } from "../lib/siteCmsClient";
+    import { fetchCmsWorks, getCmsWorksCache, type CmsWork } from "../lib/siteCmsClient";
 
     const buttons = document.querySelectorAll<HTMLButtonElement>(".filter-button");
     const results = document.querySelector<HTMLElement>("[data-works-results]");
     let activeFilter = "すべて";
+
+    const parseFallback = <T,>(value: string | undefined): T | null => {
+      if (!value) return null;
+      try {
+        return JSON.parse(value) as T;
+      } catch {
+        return null;
+      }
+    };
 
     const applyFilter = (filter: string) => {
       if (!results) return;
@@ -124,14 +143,30 @@ const achievements = [...worksData.achievements]
       });
     });
 
-    const loadWorksFromCms = async () => {
+    let worksSignature = "";
+    const renderWorks = (items: CmsWork[]) => {
       if (!results) return;
-      const result = await fetchCmsWorks();
-      if (!result.ok) return;
+      const signature = JSON.stringify(items);
+      if (signature === worksSignature) return;
+      worksSignature = signature;
       results.replaceChildren(
-        ...(result.data.length ? result.data.map(workCard) : [emptyMessage()]),
+        ...(items.length ? items.map(workCard) : [emptyMessage()]),
       );
       applyFilter(activeFilter);
+      results.setAttribute("aria-busy", "false");
+    };
+
+    const worksFallback = parseFallback<CmsWork[]>(results?.dataset.fallback);
+    const cachedWorks = getCmsWorksCache();
+    if (cachedWorks) renderWorks(cachedWorks.data);
+
+    const loadWorksFromCms = async () => {
+      const result = await fetchCmsWorks();
+      if (result.ok) {
+        renderWorks(result.data);
+        return;
+      }
+      if (!cachedWorks && worksFallback) renderWorks(worksFallback);
     };
 
     loadWorksFromCms();

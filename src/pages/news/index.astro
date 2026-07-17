@@ -9,6 +9,15 @@ const posts = (await getCollection("news", ({ data }) => data.published))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const formatDate = (date: Date) => date.toISOString().slice(0, 10);
 const slugFromId = (id: string) => id.replace(/\.md$/, "");
+const newsFallback = posts.map((post) => ({
+  id: slugFromId(post.id),
+  slug: slugFromId(post.id),
+  date: formatDate(post.data.date),
+  title: post.data.title,
+  summary: post.data.summary,
+  imageUrl: post.data.image ? asset(post.data.image) : undefined,
+  imageAlt: post.data.imageAlt || undefined,
+}));
 ---
 
 <BaseLayout title="お知らせ | あさゆみ" description="あさゆみの公演情報、演奏依頼、レッスン、YouTubeなどのお知らせ。">
@@ -17,19 +26,25 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
       <p class="section-kicker">News</p>
       <h1 class="section-title">お知らせ</h1>
       <p class="section-lead">公演情報、演奏依頼、レッスン、YouTubeなどの最新情報を掲載します。</p>
-      <div class="news-list" data-news-list data-base-path={basePath}>
-        {posts.map((post) => (
-          <a class:list={["news-card", !post.data.image && "news-card--without-image"]} href={url(`/news/${slugFromId(post.id)}/`)}>
-            <div>
-              <time datetime={formatDate(post.data.date)}>{formatDate(post.data.date)}</time>
-              <h2>{post.data.title}</h2>
-              <p>{post.data.summary}</p>
-            </div>
-            {post.data.image && (
-              <img src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} loading="lazy" onerror="this.remove(); this.parentElement?.classList.add('news-card--without-image')" />
-            )}
-          </a>
-        ))}
+      <div class="news-list" data-news-list data-base-path={basePath} data-fallback={JSON.stringify(newsFallback)} aria-busy="true">
+        <div class="cms-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-line cms-skeleton-line-short"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
+        <div class="cms-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-line cms-skeleton-line-short"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
+        <div class="cms-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-line cms-skeleton-line-short"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
+        <noscript>
+          <style>.cms-js-only { display: none !important; }</style>
+          {posts.map((post) => (
+            <a class:list={["news-card", !post.data.image && "news-card--without-image"]} href={url(`/news/${slugFromId(post.id)}/`)}>
+              <div>
+                <time datetime={formatDate(post.data.date)}>{formatDate(post.data.date)}</time>
+                <h2>{post.data.title}</h2>
+                <p>{post.data.summary}</p>
+              </div>
+              {post.data.image && (
+                <img src={asset(post.data.image)} alt={post.data.imageAlt || post.data.title} loading="lazy" onerror="this.remove(); this.parentElement?.classList.add('news-card--without-image')" />
+              )}
+            </a>
+          ))}
+        </noscript>
       </div>
       <div class="button-row">
         <a class="button secondary" href={url("/")}>Homeへ戻る</a>
@@ -38,9 +53,18 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
   </section>
 
   <script>
-    import { fetchCmsNews, type CmsNews } from "../../lib/siteCmsClient";
+    import { fetchCmsNews, getCmsNewsCache, type CmsNews } from "../../lib/siteCmsClient";
 
     const newsRoot = document.querySelector<HTMLElement>("[data-news-list]");
+
+    const parseFallback = <T,>(value: string | undefined): T | null => {
+      if (!value) return null;
+      try {
+        return JSON.parse(value) as T;
+      } catch {
+        return null;
+      }
+    };
 
     const emptyMessage = () => {
       const element = document.createElement("p");
@@ -89,16 +113,32 @@ const slugFromId = (id: string) => id.replace(/\.md$/, "");
       return card;
     };
 
-    const loadNewsFromCms = async () => {
+    let newsSignature = "";
+    const renderNews = (items: CmsNews[]) => {
       if (!newsRoot) return;
-      const result = await fetchCmsNews();
-      if (!result.ok) return;
+      const signature = JSON.stringify(items);
+      if (signature === newsSignature) return;
+      newsSignature = signature;
       const basePath = newsRoot.dataset.basePath || "/";
       newsRoot.replaceChildren(
-        ...(result.data.length
-          ? result.data.map((item) => newsCard(item, basePath))
+        ...(items.length
+          ? items.map((item) => newsCard(item, basePath))
           : [emptyMessage()]),
       );
+      newsRoot.setAttribute("aria-busy", "false");
+    };
+
+    const newsFallback = parseFallback<CmsNews[]>(newsRoot?.dataset.fallback);
+    const cachedNews = getCmsNewsCache();
+    if (cachedNews) renderNews(cachedNews.data);
+
+    const loadNewsFromCms = async () => {
+      const result = await fetchCmsNews();
+      if (result.ok) {
+        renderNews(result.data);
+        return;
+      }
+      if (!cachedNews && newsFallback) renderNews(newsFallback);
     };
 
     loadNewsFromCms();
