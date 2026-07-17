@@ -27,7 +27,7 @@ const worksFallback = achievements.map((work) => ({
         ))}
       </div>
 
-      <div class="works-results" data-works-results data-fallback={JSON.stringify(worksFallback)} aria-busy="true">
+      <div class="works-results" data-works-results data-fallback={JSON.stringify(worksFallback)} data-cms-state="loading" aria-busy="true">
         <div class="cms-skeleton-card cms-work-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-media"></span><span class="cms-skeleton-line cms-skeleton-line-short"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
         <div class="cms-skeleton-card cms-work-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-media"></span><span class="cms-skeleton-line cms-skeleton-line-short"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
         <div class="cms-skeleton-card cms-work-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-media"></span><span class="cms-skeleton-line cms-skeleton-line-short"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
@@ -55,7 +55,7 @@ const worksFallback = achievements.map((work) => ({
   </section>
 
   <script>
-    import { fetchCmsWorks, getCmsWorksCache, type CmsWork } from "../lib/siteCmsClient";
+    import { fetchCmsWorks, getCmsWorksCache, prefetchCmsTargets, type CmsWork } from "../lib/siteCmsClient";
 
     const buttons = document.querySelectorAll<HTMLButtonElement>(".filter-button");
     const results = document.querySelector<HTMLElement>("[data-works-results]");
@@ -144,7 +144,7 @@ const worksFallback = achievements.map((work) => ({
     });
 
     let worksSignature = "";
-    const renderWorks = (items: CmsWork[]) => {
+    const renderWorks = (items: CmsWork[], state: "ready" | "fallback") => {
       if (!results) return;
       const signature = JSON.stringify(items);
       if (signature === worksSignature) return;
@@ -154,21 +154,22 @@ const worksFallback = achievements.map((work) => ({
       );
       applyFilter(activeFilter);
       results.setAttribute("aria-busy", "false");
+      results.setAttribute("data-cms-state", state);
     };
 
     const worksFallback = parseFallback<CmsWork[]>(results?.dataset.fallback);
     const cachedWorks = getCmsWorksCache();
-    if (cachedWorks) renderWorks(cachedWorks.data);
+    if (cachedWorks) renderWorks(cachedWorks.data, "ready");
 
     const loadWorksFromCms = async () => {
       const result = await fetchCmsWorks();
       if (result.ok) {
-        renderWorks(result.data);
+        renderWorks(result.data, "ready");
         return;
       }
-      if (!cachedWorks && worksFallback) renderWorks(worksFallback);
+      if (!cachedWorks && worksFallback) renderWorks(worksFallback, "fallback");
     };
 
-    loadWorksFromCms();
+    void loadWorksFromCms().finally(() => prefetchCmsTargets(["youtube", "news", "schedule"]));
   </script>
 </BaseLayout>

@@ -104,7 +104,7 @@ const youtubeCmsFallback = {
     <div class="section-inner">
       <p class="section-kicker">News</p>
       <h2 class="section-title">お知らせ</h2>
-      <div class="news-list compact-news" data-home-news data-base-path={basePath} data-fallback={JSON.stringify(homeNewsFallback)} aria-busy="true">
+      <div class="news-list compact-news" data-home-news data-base-path={basePath} data-fallback={JSON.stringify(homeNewsFallback)} data-cms-state="loading" aria-busy="true">
         <div class="cms-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-line cms-skeleton-line-short"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
         <div class="cms-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-line cms-skeleton-line-short"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
         <noscript>
@@ -133,7 +133,7 @@ const youtubeCmsFallback = {
     <div class="section-inner">
       <p class="section-kicker">YouTube</p>
       <h2 class="section-title section-title-medium">{youtube.title}</h2>
-      <div class="youtube-latest" data-youtube-latest aria-busy="true">
+      <div class="youtube-latest" data-youtube-latest data-cms-state="loading" aria-busy="true">
         <div class="cms-skeleton-card cms-youtube-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-line cms-skeleton-line-short"></span><span class="cms-skeleton-media"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span></div>
         <noscript>
           <style>.cms-js-only { display: none !important; }</style>
@@ -150,7 +150,7 @@ const youtubeCmsFallback = {
           </article>
         </noscript>
       </div>
-      <div class="youtube-grid" data-youtube-featured aria-busy="true">
+      <div class="youtube-grid" data-youtube-featured data-cms-state="loading" aria-busy="true">
         <div class="cms-skeleton-card cms-youtube-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-media"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
         <div class="cms-skeleton-card cms-youtube-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-media"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
         <div class="cms-skeleton-card cms-youtube-skeleton-card cms-js-only" aria-hidden="true"><span class="cms-skeleton-media"></span><span class="cms-skeleton-line cms-skeleton-line-title"></span><span class="cms-skeleton-line"></span></div>
@@ -182,6 +182,7 @@ const youtubeCmsFallback = {
       fetchCmsYoutube,
       getCmsNewsCache,
       getCmsYoutubeCache,
+      prefetchCmsTargets,
       getYoutubeEmbedUrl,
       getYoutubeWatchUrl,
       type CmsNews,
@@ -248,7 +249,7 @@ const youtubeCmsFallback = {
     };
 
     let youtubeSignature = "";
-    const renderYoutube = (data: CmsYoutube) => {
+    const renderYoutube = (data: CmsYoutube, state: "ready" | "fallback") => {
       if (!featuredRoot || !latestRoot) return;
       const signature = JSON.stringify(data);
       if (signature === youtubeSignature) return;
@@ -268,19 +269,21 @@ const youtubeCmsFallback = {
       );
       featuredRoot.setAttribute("aria-busy", "false");
       latestRoot.setAttribute("aria-busy", "false");
+      featuredRoot.setAttribute("data-cms-state", state);
+      latestRoot.setAttribute("data-cms-state", state);
     };
 
     const youtubeFallback = parseFallback<CmsYoutube>(youtubeSection?.dataset.youtubeFallback);
     const cachedYoutube = getCmsYoutubeCache();
-    if (cachedYoutube) renderYoutube(cachedYoutube.data);
+    if (cachedYoutube) renderYoutube(cachedYoutube.data, "ready");
 
     const loadYoutubeFromCms = async () => {
       const result = await fetchCmsYoutube();
       if (result.ok) {
-        renderYoutube(result.data);
+        renderYoutube(result.data, "ready");
         return;
       }
-      if (!cachedYoutube && youtubeFallback) renderYoutube(youtubeFallback);
+      if (!cachedYoutube && youtubeFallback) renderYoutube(youtubeFallback, "fallback");
     };
 
     const homeNewsRoot = document.querySelector<HTMLElement>("[data-home-news]");
@@ -324,7 +327,7 @@ const youtubeCmsFallback = {
     };
 
     let homeNewsSignature = "";
-    const renderHomeNews = (items: CmsNews[]) => {
+    const renderHomeNews = (items: CmsNews[], state: "ready" | "fallback") => {
       if (!homeNewsRoot) return;
       const basePath = homeNewsRoot.dataset.basePath || "/";
       const latestItems = [...items]
@@ -339,22 +342,24 @@ const youtubeCmsFallback = {
           : [emptyMessage("現在お知らせはありません。")]),
       );
       homeNewsRoot.setAttribute("aria-busy", "false");
+      homeNewsRoot.setAttribute("data-cms-state", state);
     };
 
     const homeNewsFallback = parseFallback<CmsNews[]>(homeNewsRoot?.dataset.fallback);
     const cachedNews = getCmsNewsCache();
-    if (cachedNews) renderHomeNews(cachedNews.data);
+    if (cachedNews) renderHomeNews(cachedNews.data, "ready");
 
     const loadHomeNewsFromCms = async () => {
       const result = await fetchCmsNews();
       if (result.ok) {
-        renderHomeNews(result.data);
+        renderHomeNews(result.data, "ready");
         return;
       }
-      if (!cachedNews && homeNewsFallback) renderHomeNews(homeNewsFallback);
+      if (!cachedNews && homeNewsFallback) renderHomeNews(homeNewsFallback, "fallback");
     };
 
-    void Promise.all([loadYoutubeFromCms(), loadHomeNewsFromCms()]);
+    void Promise.all([loadYoutubeFromCms(), loadHomeNewsFromCms()])
+      .finally(() => prefetchCmsTargets(["works", "schedule"]));
   </script>
 
   <section class="section band">
