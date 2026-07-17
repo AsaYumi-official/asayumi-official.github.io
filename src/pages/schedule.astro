@@ -12,14 +12,11 @@ const schedule = await getScheduleData();
       <h1 class="section-title">予定カレンダー</h1>
       <p class="section-lead">出演予定、動画投稿、SNS投稿などを月ごとに確認できます。</p>
 
-      <div class="calendar-shell" data-schedule-fallback={JSON.stringify(schedule)} aria-busy="true">
+      <div class="calendar-shell" data-schedule-fallback={JSON.stringify(schedule)} data-cms-state="loading" aria-busy="true">
         <div class="calendar-loading cms-js-only" data-calendar-loading aria-live="polite">
           <span class="cms-skeleton-line cms-skeleton-line-heading"></span>
-          <div class="calendar-skeleton-week"><span class="cms-skeleton-line"></span><span class="cms-skeleton-line"></span><span class="cms-skeleton-line"></span><span class="cms-skeleton-line"></span><span class="cms-skeleton-line"></span><span class="cms-skeleton-line"></span><span class="cms-skeleton-line"></span></div>
-          <div class="calendar-skeleton-grid">{Array.from({ length: 35 }, () => <span class="cms-skeleton-cell"></span>)}</div>
+          <p>予定を読み込んでいます</p>
           <span class="cms-skeleton-line cms-skeleton-line-title"></span>
-          <span class="cms-skeleton-line"></span>
-          <span class="cms-skeleton-line"></span>
         </div>
         <div data-calendar-content hidden>
           <div class="calendar-header">
@@ -52,7 +49,7 @@ const schedule = await getScheduleData();
   </section>
 
   <script>
-    import { fetchCmsSchedule, getCmsScheduleCache, safeUrl, type CmsSchedule } from "../lib/siteCmsClient";
+    import { fetchCmsSchedule, getCmsScheduleCache, prefetchCmsTargets, safeUrl, type CmsSchedule } from "../lib/siteCmsClient";
 
     type ScheduleEvent = {
       date: string;
@@ -150,8 +147,8 @@ const schedule = await getScheduleData();
 
     function renderCalendar() {
       if (!title || !grid || !list || !calendarContent) return;
+      calendarLoading?.remove();
       calendarContent.hidden = false;
-      if (calendarLoading) calendarLoading.hidden = true;
       shell?.setAttribute("aria-busy", "false");
       const year = cursor.getFullYear();
       const month = cursor.getMonth();
@@ -164,7 +161,7 @@ const schedule = await getScheduleData();
       const monthlyListEvents = monthEvents.filter(showInMonthlyList);
 
       title.textContent = formatMonth(cursor);
-      grid.innerHTML = "";
+      grid.replaceChildren();
       ["日", "月", "火", "水", "木", "金", "土"].forEach((day) => {
         const cell = document.createElement("div");
         cell.className = "calendar-weekday";
@@ -241,27 +238,39 @@ const schedule = await getScheduleData();
       renderCalendar();
     });
     let scheduleSignature = "";
-    const renderSchedule = (items: CmsSchedule[]) => {
+    const renderSchedule = (items: CmsSchedule[], state: "ready" | "fallback") => {
       const signature = JSON.stringify(items);
       if (signature === scheduleSignature) return;
       scheduleSignature = signature;
       events = sortEvents(items);
+      shell?.setAttribute("data-cms-state", state);
       renderCalendar();
     };
 
     const scheduleFallback = parseFallback<CmsSchedule[]>(shell?.dataset.scheduleFallback);
     const cachedSchedule = getCmsScheduleCache();
-    if (cachedSchedule) renderSchedule(cachedSchedule.data);
+    if (cachedSchedule) renderSchedule(cachedSchedule.data, "ready");
+
+    const showCalendarError = () => {
+      calendarLoading?.replaceChildren();
+      const message = document.createElement("p");
+      message.className = "cms-empty-message";
+      message.textContent = "予定を読み込めませんでした。";
+      calendarLoading?.append(message);
+      shell?.setAttribute("data-cms-state", "error");
+      shell?.setAttribute("aria-busy", "false");
+    };
 
     const loadScheduleFromCms = async () => {
       const result = await fetchCmsSchedule();
       if (result.ok) {
-        renderSchedule(result.data);
+        renderSchedule(result.data, "ready");
         return;
       }
-      if (!cachedSchedule && scheduleFallback) renderSchedule(scheduleFallback);
+      if (!cachedSchedule && scheduleFallback) renderSchedule(scheduleFallback, "fallback");
+      else if (!cachedSchedule) showCalendarError();
     };
 
-    loadScheduleFromCms();
+    void loadScheduleFromCms().finally(() => prefetchCmsTargets(["youtube", "news", "works"]));
   </script>
 </BaseLayout>

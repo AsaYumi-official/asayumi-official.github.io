@@ -64,9 +64,11 @@ const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 const timePattern = /^\d{1,2}:\d{2}$/;
 const CMS_CACHE_SCHEMA_VERSION = 1;
 const CMS_CACHE_PREFIX = "asayumi:cms-cache";
+const CMS_SESSION_FETCHED_TARGETS_KEY = `${CMS_CACHE_PREFIX}:session-fetched-targets`;
 const CMS_CACHE_FRESH_AGE_MS = 5 * 60 * 1000;
 const CMS_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const inFlightRequests = new Map<CmsTarget, Promise<CmsFetchResult<unknown>>>();
+const prefetchedTargets = new Set<CmsTarget>();
 
 const isRecord = (value: unknown): value is CmsRecord =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -265,6 +267,32 @@ const browserStorage = () => {
   }
 };
 
+const hasFetchedTargetInSession = (target: CmsTarget) => {
+  if (typeof window === "undefined") return false;
+  try {
+    const stored = window.sessionStorage.getItem(CMS_SESSION_FETCHED_TARGETS_KEY);
+    const targets: unknown = stored ? JSON.parse(stored) : [];
+    return Array.isArray(targets) && targets.includes(target);
+  } catch {
+    return false;
+  }
+};
+
+const markTargetFetchedInSession = (target: CmsTarget) => {
+  if (typeof window === "undefined") return;
+  try {
+    const stored = window.sessionStorage.getItem(CMS_SESSION_FETCHED_TARGETS_KEY);
+    const parsed: unknown = stored ? JSON.parse(stored) : [];
+    const targets: CmsTarget[] = Array.isArray(parsed)
+      ? parsed.filter((item: unknown): item is CmsTarget => item === "youtube" || item === "news" || item === "works" || item === "schedule")
+      : [];
+    if (!targets.includes(target)) targets.push(target);
+    window.sessionStorage.setItem(CMS_SESSION_FETCHED_TARGETS_KEY, JSON.stringify(targets));
+  } catch {
+    // sessionStorage is only an optimization for cross-page prefetching.
+  }
+};
+
 const removeCmsCache = (target: CmsTarget) => {
   try {
     browserStorage()?.removeItem(cacheKey(target));
@@ -332,6 +360,7 @@ const fetchCms = <T>(target: CmsTarget, normalize: (value: unknown) => T | null)
       const normalized = normalize(await response.json());
       if (normalized === null) return { ok: false };
       writeCmsCache(target, normalized);
+      markTargetFetchedInSession(target);
       return { ok: true, data: normalized };
     } catch {
       return { ok: false };
@@ -354,6 +383,38 @@ export const getCmsYoutubeCache = () => readCmsCache("youtube", normalizeYoutube
 export const getCmsNewsCache = () => readCmsCache("news", normalizeNews);
 export const getCmsWorksCache = () => readCmsCache("works", normalizeWorks);
 export const getCmsScheduleCache = () => readCmsCache("schedule", normalizeSchedule);
+
+const prefetchTarget = (target: CmsTarget) => {
+  switch (target) {
+    case "youtube": return fetchCmsYoutube();
+    case "news": return fetchCmsNews();
+    case "works": return fetchCmsWorks();
+    case "schedule": return fetchCmsSchedule();
+  }
+};
+
+export const prefetchCmsTargets = (targets: CmsTarget[]) => {
+  const uniqueTargets = [...new Set(targets)].filter((target) =>
+    !prefetchedTargets.has(target) && !hasFetchedTargetInSession(target),
+  );
+  uniqueTargets.forEach((target) => prefetchedTargets.add(target));
+  if (!uniqueTargets.length || typeof window === "undefined") return;
+
+  const run = () => {
+    void Promise.all(uniqueTargets.map((target) => prefetchTarget(target))).catch(() => {
+      // Prefetching must never surface an error in the current page.
+    });
+  };
+
+  const requestIdle = (window as Window & {
+    requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number;
+  }).requestIdleCallback;
+  if (requestIdle) {
+    requestIdle(run, { timeout: 1200 });
+  } else {
+    setTimeout(run, 500);
+  }
+};
 
 export const getYoutubeEmbedUrl = (video: CmsVideo) =>
   video.videoId && videoIdPattern.test(video.videoId)

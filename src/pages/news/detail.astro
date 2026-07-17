@@ -20,7 +20,7 @@ const fallbackNews = (await getCollection("news", ({ data }) => data.published))
 ---
 
 <BaseLayout title="お知らせ | あさゆみ" description="あさゆみのお知らせ詳細。">
-  <article class="section news-detail" data-news-detail data-base-path={basePath} data-fallback={JSON.stringify(fallbackNews)} aria-busy="true">
+  <article class="section news-detail" data-news-detail data-base-path={basePath} data-fallback={JSON.stringify(fallbackNews)} data-cms-state="loading" aria-busy="true">
     <div class="section-inner narrow" data-news-detail-content>
       <p class="section-kicker">News</p>
       <div class="cms-detail-skeleton cms-js-only" aria-hidden="true">
@@ -41,7 +41,7 @@ const fallbackNews = (await getCollection("news", ({ data }) => data.published))
   </article>
 
   <script>
-    import { fetchCmsNews, getCmsNewsCache, type CmsNews } from "../../lib/siteCmsClient";
+    import { fetchCmsNews, getCmsNewsCache, prefetchCmsTargets, type CmsNews } from "../../lib/siteCmsClient";
 
     const detailRoot = document.querySelector<HTMLElement>("[data-news-detail]");
     const contentRoot = document.querySelector<HTMLElement>("[data-news-detail-content]");
@@ -78,6 +78,7 @@ const fallbackNews = (await getCollection("news", ({ data }) => data.published))
       contentRoot.append(kicker, heading);
       addBackLink(contentRoot, basePath);
       detailRoot?.setAttribute("aria-busy", "false");
+      detailRoot?.setAttribute("data-cms-state", "error");
     };
 
     const appendBody = (root: HTMLElement, body: string | undefined, summary: string | undefined) => {
@@ -96,7 +97,7 @@ const fallbackNews = (await getCollection("news", ({ data }) => data.published))
     };
 
     let articleSignature = "";
-    const renderArticle = (item: CmsNews, basePath: string) => {
+    const renderArticle = (item: CmsNews, basePath: string, state: "ready" | "fallback") => {
       if (!contentRoot) return;
       const signature = JSON.stringify(item);
       if (signature === articleSignature) return;
@@ -131,6 +132,7 @@ const fallbackNews = (await getCollection("news", ({ data }) => data.published))
       addBackLink(contentRoot, basePath);
       document.title = `${item.title} | あさゆみ`;
       detailRoot?.setAttribute("aria-busy", "false");
+      detailRoot?.setAttribute("data-cms-state", state);
     };
 
     const loadArticle = async () => {
@@ -143,12 +145,12 @@ const fallbackNews = (await getCollection("news", ({ data }) => data.published))
       const fallbackNews = parseFallback<CmsNews[]>(detailRoot?.dataset.fallback) || [];
       const cachedNews = getCmsNewsCache();
       const cachedArticle = cachedNews?.data.find((item) => item.id === identifier || item.slug === identifier);
-      if (cachedArticle) renderArticle(cachedArticle, basePath);
+      if (cachedArticle) renderArticle(cachedArticle, basePath, "ready");
       const result = await fetchCmsNews();
       if (!result.ok) {
         if (!cachedArticle) {
           const fallbackArticle = fallbackNews.find((item) => item.id === identifier || item.slug === identifier);
-          if (fallbackArticle) renderArticle(fallbackArticle, basePath);
+          if (fallbackArticle) renderArticle(fallbackArticle, basePath, "fallback");
           else showMissing("記事が見つかりません", basePath);
         }
         return;
@@ -158,9 +160,9 @@ const fallbackNews = (await getCollection("news", ({ data }) => data.published))
         showMissing("記事が見つかりません", basePath);
         return;
       }
-      renderArticle(article, basePath);
+      renderArticle(article, basePath, "ready");
     };
 
-    loadArticle();
+    void loadArticle().finally(() => prefetchCmsTargets(["youtube", "works", "schedule"]));
   </script>
 </BaseLayout>
