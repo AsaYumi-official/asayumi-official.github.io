@@ -736,6 +736,13 @@ main {
   margin: 0 0 1.3em;
 }
 
+.article-body a {
+  color: var(--wine);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
 .works-gallery {
   display: grid;
   gap: 16px;
