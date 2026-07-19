@@ -81,6 +81,34 @@ const fallbackNews = (await getCollection("news", ({ data }) => data.published))
       detailRoot?.setAttribute("data-cms-state", "error");
     };
 
+    const appendLinkedText = (root: HTMLElement, text: string) => {
+      const urlPattern = /https?:\/\/[^\s<>]+/g;
+      let lastIndex = 0;
+
+      for (const match of text.matchAll(urlPattern)) {
+        const matchIndex = match.index ?? 0;
+        const rawUrl = match[0];
+        const url = rawUrl.replace(/[.,!?;:)}\]）】」』]+$/u, "");
+        const trailingText = rawUrl.slice(url.length);
+
+        root.append(document.createTextNode(text.slice(lastIndex, matchIndex)));
+        try {
+          const link = document.createElement("a");
+          link.href = new URL(url).href;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = url;
+          root.append(link);
+        } catch {
+          root.append(document.createTextNode(url));
+        }
+        root.append(document.createTextNode(trailingText));
+        lastIndex = matchIndex + rawUrl.length;
+      }
+
+      root.append(document.createTextNode(text.slice(lastIndex)));
+    };
+
     const appendBody = (root: HTMLElement, body: string | undefined, summary: string | undefined) => {
       const articleBody = document.createElement("div");
       articleBody.className = "article-body";
@@ -90,7 +118,7 @@ const fallbackNews = (await getCollection("news", ({ data }) => data.published))
         .filter(Boolean);
       paragraphs.forEach((paragraph) => {
         const element = document.createElement("p");
-        element.textContent = paragraph;
+        appendLinkedText(element, paragraph);
         articleBody.append(element);
       });
       if (paragraphs.length) root.append(articleBody);
